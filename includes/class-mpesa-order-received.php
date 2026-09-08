@@ -97,25 +97,25 @@ class Mpesa_Order_Received {
                 </svg>
 
                 <div class="mpesa-status-title" style="color: #0f834d;">
-                    <?php esc_html_e('Payment Confirmed!', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Payment Confirmed!', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
 
                 <div class="mpesa-status-message">
-                    <?php esc_html_e('Your M-Pesa payment has been received and confirmed. Your order is now being processed.', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Your M-Pesa payment has been received and confirmed. Your order is now being processed.', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
 
                 <?php if ($transaction->transaction_id): ?>
                     <div class="mpesa-status-details">
                         <p>
-                            <strong><?php esc_html_e('M-Pesa Receipt:', 'mpesa-till-gateway'); ?></strong>
+                            <strong><?php esc_html_e('M-Pesa Receipt:', 'mpesa-gateway-for-woocommerce'); ?></strong>
                             <span><?php echo esc_html($transaction->transaction_id); ?></span>
                         </p>
                         <p>
-                            <strong><?php esc_html_e('Amount Paid:', 'mpesa-till-gateway'); ?></strong>
+                            <strong><?php esc_html_e('Amount Paid:', 'mpesa-gateway-for-woocommerce'); ?></strong>
                             <span><?php echo wc_price($transaction->amount); ?></span>
                         </p>
                         <p>
-                            <strong><?php esc_html_e('Phone Number:', 'mpesa-till-gateway'); ?></strong>
+                            <strong><?php esc_html_e('Phone Number:', 'mpesa-gateway-for-woocommerce'); ?></strong>
                             <span><?php echo esc_html($transaction->phone_number); ?></span>
                         </p>
                     </div>
@@ -131,7 +131,7 @@ class Mpesa_Order_Received {
                 </svg>
 
                 <div class="mpesa-status-title" style="color: #e2401c;">
-                    <?php esc_html_e('Payment Failed', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Payment Failed', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
 
                 <div class="mpesa-status-message">
@@ -139,7 +139,7 @@ class Mpesa_Order_Received {
                     if ($transaction->result_desc) {
                         echo esc_html($transaction->result_desc);
                     } else {
-                        esc_html_e('The M-Pesa payment was not completed.', 'mpesa-till-gateway');
+                        esc_html_e('The M-Pesa payment was not completed.', 'mpesa-gateway-for-woocommerce');
                     }
                     ?>
                 </div>
@@ -153,24 +153,24 @@ class Mpesa_Order_Received {
                 <div class="mpesa-status-icon pending">⏱️</div>
 
                 <div class="mpesa-status-title">
-                    <?php esc_html_e('Waiting for Payment Confirmation', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Waiting for Payment Confirmation', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
 
                 <div class="mpesa-status-message">
                     <span class="mpesa-status-indicator pending"></span>
-                    <span id="mpesa-status-text"><?php esc_html_e('Please check your phone and enter your M-Pesa PIN to complete the payment.', 'mpesa-till-gateway'); ?></span>
+                    <span id="mpesa-status-text"><?php esc_html_e('Please check your phone and enter your M-Pesa PIN to complete the payment.', 'mpesa-gateway-for-woocommerce'); ?></span>
                 </div>
 
                 <div class="mpesa-timer">
-                    <?php esc_html_e('Time elapsed:', 'mpesa-till-gateway'); ?> <span id="mpesa-time-elapsed">0:00</span>
+                    <?php esc_html_e('Time elapsed:', 'mpesa-gateway-for-woocommerce'); ?> <span id="mpesa-time-elapsed">0:00</span>
                 </div>
 
                 <div class="mpesa-instructions">
-                    <h4><?php esc_html_e('What to do next:', 'mpesa-till-gateway'); ?></h4>
+                    <h4><?php esc_html_e('What to do next:', 'mpesa-gateway-for-woocommerce'); ?></h4>
                     <ol>
-                        <li><?php esc_html_e('Check your phone for an M-Pesa payment prompt', 'mpesa-till-gateway'); ?></li>
-                        <li><?php esc_html_e('Enter your M-Pesa PIN to confirm payment', 'mpesa-till-gateway'); ?></li>
-                        <li><?php esc_html_e('Wait for confirmation (this page will update automatically)', 'mpesa-till-gateway'); ?></li>
+                        <li><?php esc_html_e('Check your phone for an M-Pesa payment prompt', 'mpesa-gateway-for-woocommerce'); ?></li>
+                        <li><?php esc_html_e('Enter your M-Pesa PIN to confirm payment', 'mpesa-gateway-for-woocommerce'); ?></li>
+                        <li><?php esc_html_e('Wait for confirmation (this page will update automatically)', 'mpesa-gateway-for-woocommerce'); ?></li>
                     </ol>
                 </div>
             </div>
@@ -201,12 +201,12 @@ class Mpesa_Order_Received {
     private static function render_retry_section($order, $transaction) {
         ?>
         <div class="mpesa-retry-section">
-            <h3><?php esc_html_e('Retry Payment', 'mpesa-till-gateway'); ?></h3>
-            <p><?php esc_html_e('Didn\'t receive the payment prompt? Click below to send a new request.', 'mpesa-till-gateway'); ?></p>
+            <h3><?php esc_html_e('Retry Payment', 'mpesa-gateway-for-woocommerce'); ?></h3>
+            <p><?php esc_html_e('Didn\'t receive the payment prompt? Click below to send a new request.', 'mpesa-gateway-for-woocommerce'); ?></p>
 
             <div class="mpesa-form-group">
                 <label for="mpesa-retry-phone">
-                    <?php esc_html_e('Phone Number', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Phone Number', 'mpesa-gateway-for-woocommerce'); ?>
                 </label>
                 <input
                     type="tel"
@@ -216,12 +216,12 @@ class Mpesa_Order_Received {
                     maxlength="12"
                 >
                 <div class="description">
-                    <?php esc_html_e('Enter the phone number to receive the M-Pesa payment prompt', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Enter the phone number to receive the M-Pesa payment prompt', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
             </div>
 
             <button type="button" id="mpesa-retry-payment" class="mpesa-button">
-                <?php esc_html_e('Send Payment Request', 'mpesa-till-gateway'); ?>
+                <?php esc_html_e('Send Payment Request', 'mpesa-gateway-for-woocommerce'); ?>
             </button>
         </div>
         <?php
@@ -233,36 +233,36 @@ class Mpesa_Order_Received {
     private static function render_verify_section($order, $transaction) {
         ?>
         <div class="mpesa-verify-section">
-            <h3><?php esc_html_e('Already Paid?', 'mpesa-till-gateway'); ?></h3>
+            <h3><?php esc_html_e('Already Paid?', 'mpesa-gateway-for-woocommerce'); ?></h3>
             <p class="description">
-                <?php esc_html_e('If you have already completed the payment, enter your M-Pesa transaction code below to verify.', 'mpesa-till-gateway'); ?>
+                <?php esc_html_e('If you have already completed the payment, enter your M-Pesa transaction code below to verify.', 'mpesa-gateway-for-woocommerce'); ?>
             </p>
 
             <div class="mpesa-sms-example">
-                <?php esc_html_e('Your M-Pesa confirmation SMS looks like this:', 'mpesa-till-gateway'); ?><br><br>
-                <strong>QA12BC3DEF</strong> <?php esc_html_e('Confirmed', 'mpesa-till-gateway'); ?><br>
-                <?php esc_html_e('You have paid KES', 'mpesa-till-gateway'); ?> <?php echo number_format($order->get_total(), 2); ?><br>
-                <?php esc_html_e('on', 'mpesa-till-gateway'); ?> <?php echo gmdate('d/m/Y \a\t h:i A'); ?>
+                <?php esc_html_e('Your M-Pesa confirmation SMS looks like this:', 'mpesa-gateway-for-woocommerce'); ?><br><br>
+                <strong>QA12BC3DEF</strong> <?php esc_html_e('Confirmed', 'mpesa-gateway-for-woocommerce'); ?><br>
+                <?php esc_html_e('You have paid KES', 'mpesa-gateway-for-woocommerce'); ?> <?php echo number_format($order->get_total(), 2); ?><br>
+                <?php esc_html_e('on', 'mpesa-gateway-for-woocommerce'); ?> <?php echo gmdate('d/m/Y \a\t h:i A'); ?>
             </div>
 
             <div class="mpesa-form-group">
                 <label for="mpesa-transaction-code">
-                    <?php esc_html_e('M-Pesa Transaction Code', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('M-Pesa Transaction Code', 'mpesa-gateway-for-woocommerce'); ?>
                 </label>
                 <input
                     type="text"
                     id="mpesa-transaction-code"
-                    placeholder="<?php esc_html_e('e.g. QA12BC3DEF', 'mpesa-till-gateway'); ?>"
+                    placeholder="<?php esc_html_e('e.g. QA12BC3DEF', 'mpesa-gateway-for-woocommerce'); ?>"
                     maxlength="20"
                     style="text-transform: uppercase;"
                 >
                 <div class="description">
-                    <?php esc_html_e('Enter the transaction code from your M-Pesa confirmation SMS', 'mpesa-till-gateway'); ?>
+                    <?php esc_html_e('Enter the transaction code from your M-Pesa confirmation SMS', 'mpesa-gateway-for-woocommerce'); ?>
                 </div>
             </div>
 
             <button type="button" id="mpesa-verify-code-btn" class="mpesa-button mpesa-button-secondary">
-                <?php esc_html_e('Verify Payment', 'mpesa-till-gateway'); ?>
+                <?php esc_html_e('Verify Payment', 'mpesa-gateway-for-woocommerce'); ?>
             </button>
         </div>
         <?php

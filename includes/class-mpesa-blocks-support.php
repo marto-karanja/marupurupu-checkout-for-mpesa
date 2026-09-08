@@ -89,7 +89,7 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
         if (function_exists('wp_set_script_translations')) {
             wp_set_script_translations(
                 'wc-mpesa-till-blocks',
-                'mpesa-till-gateway',
+                'mpesa-gateway-for-woocommerce',
                 WC_MPESA_TILL_PLUGIN_DIR . 'languages'
             );
         }
@@ -99,7 +99,7 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
             'wc-mpesa-till-blocks',
             'wcMpesaTillData',
             [
-                'title' => $this->gateway ? $this->gateway->title : __('M-Pesa', 'mpesa-till-gateway'),
+                'title' => $this->gateway ? $this->gateway->title : __('M-Pesa', 'mpesa-gateway-for-woocommerce'),
                 'description' => $this->gateway ? $this->gateway->description : '',
             ]
         );
@@ -119,8 +119,8 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
             // empty array, so the blocks checkout doesn't render a blank
             // payment method.
             return [
-                'title' => __('M-Pesa', 'mpesa-till-gateway'),
-                'description' => __('Pay securely using M-Pesa mobile money.', 'mpesa-till-gateway'),
+                'title' => __('M-Pesa', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Pay securely using M-Pesa mobile money.', 'mpesa-gateway-for-woocommerce'),
                 'supports' => ['products'],
                 'icon' => '',
             ];

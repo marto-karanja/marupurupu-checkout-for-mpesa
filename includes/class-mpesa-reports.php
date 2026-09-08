@@ -22,8 +22,8 @@ class Mpesa_Reports {
      */
     public static function add_menu_page() {
         add_menu_page(
-            __('M-Pesa Payments', 'mpesa-till-gateway'),
-            __('M-Pesa Payments', 'mpesa-till-gateway'),
+            __('M-Pesa Payments', 'mpesa-gateway-for-woocommerce'),
+            __('M-Pesa Payments', 'mpesa-gateway-for-woocommerce'),
             'manage_woocommerce',
             'mpesa-payments',
             array(__CLASS__, 'render_reports_page'),
@@ -34,8 +34,8 @@ class Mpesa_Reports {
         // Add submenu pages
         add_submenu_page(
             'mpesa-payments',
-            __('Reports', 'mpesa-till-gateway'),
-            __('Reports', 'mpesa-till-gateway'),
+            __('Reports', 'mpesa-gateway-for-woocommerce'),
+            __('Reports', 'mpesa-gateway-for-woocommerce'),
             'manage_woocommerce',
             'mpesa-payments',
             array(__CLASS__, 'render_reports_page')
@@ -43,8 +43,8 @@ class Mpesa_Reports {
 
         add_submenu_page(
             'mpesa-payments',
-            __('Transactions', 'mpesa-till-gateway'),
-            __('Transactions', 'mpesa-till-gateway'),
+            __('Transactions', 'mpesa-gateway-for-woocommerce'),
+            __('Transactions', 'mpesa-gateway-for-woocommerce'),
             'manage_woocommerce',
             'mpesa-transactions',
             array('Mpesa_Admin_Page', 'render_page')
@@ -52,8 +52,8 @@ class Mpesa_Reports {
 
         add_submenu_page(
             'mpesa-payments',
-            __('Settings', 'mpesa-till-gateway'),
-            __('Settings', 'mpesa-till-gateway'),
+            __('Settings', 'mpesa-gateway-for-woocommerce'),
+            __('Settings', 'mpesa-gateway-for-woocommerce'),
             'manage_woocommerce',
             'admin.php?page=wc-settings&tab=checkout&section=mpesa_till'
         );
@@ -98,7 +98,7 @@ class Mpesa_Reports {
         ?>
         <div class="wrap">
             <h1 class="wp-heading-inline">
-                <?php esc_html_e('M-Pesa Payment Reports', 'mpesa-till-gateway'); ?>
+                <?php esc_html_e('M-Pesa Payment Reports', 'mpesa-gateway-for-woocommerce'); ?>
             </h1>
             <hr class="wp-header-end">
 
@@ -107,18 +107,18 @@ class Mpesa_Reports {
                 <form method="get" action="">
                     <input type="hidden" name="page" value="mpesa-payments">
 
-                    <label for="date_from"><?php esc_html_e('From:', 'mpesa-till-gateway'); ?></label>
+                    <label for="date_from"><?php esc_html_e('From:', 'mpesa-gateway-for-woocommerce'); ?></label>
                     <input type="date" name="date_from" id="date_from" value="<?php echo esc_attr($date_from); ?>">
 
-                    <label for="date_to"><?php esc_html_e('To:', 'mpesa-till-gateway'); ?></label>
+                    <label for="date_to"><?php esc_html_e('To:', 'mpesa-gateway-for-woocommerce'); ?></label>
                     <input type="date" name="date_to" id="date_to" value="<?php echo esc_attr($date_to); ?>">
 
-                    <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'mpesa-till-gateway'); ?>">
+                    <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'mpesa-gateway-for-woocommerce'); ?>">
 
-                    <a href="?page=mpesa-payments" class="button"><?php esc_html_e('Reset', 'mpesa-till-gateway'); ?></a>
+                    <a href="?page=mpesa-payments" class="button"><?php esc_html_e('Reset', 'mpesa-gateway-for-woocommerce'); ?></a>
 
                     <a href="<?php echo esc_url(self::get_export_url($date_from, $date_to)); ?>" class="button" style="float: right;">
-                        <?php esc_html_e('Export Report (CSV)', 'mpesa-till-gateway'); ?>
+                        <?php esc_html_e('Export Report (CSV)', 'mpesa-gateway-for-woocommerce'); ?>
                     </a>
                 </form>
             </div>
@@ -131,7 +131,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo wc_price($stats->total_revenue); ?></h3>
-                        <p><?php esc_html_e('Total Revenue', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Total Revenue', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
 
@@ -141,7 +141,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->completed); ?></h3>
-                        <p><?php esc_html_e('Successful Payments', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Successful Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
 
@@ -151,7 +151,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->pending); ?></h3>
-                        <p><?php esc_html_e('Pending Payments', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Pending Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
 
@@ -161,7 +161,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->failed); ?></h3>
-                        <p><?php esc_html_e('Failed Payments', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Failed Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
 
@@ -171,7 +171,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->total, 0); ?></h3>
-                        <p><?php esc_html_e('Total Transactions', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Total Transactions', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
 
@@ -181,7 +181,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo wc_price($stats->avg_transaction); ?></h3>
-                        <p><?php esc_html_e('Average Transaction', 'mpesa-till-gateway'); ?></p>
+                        <p><?php esc_html_e('Average Transaction', 'mpesa-gateway-for-woocommerce'); ?></p>
                     </div>
                 </div>
             </div>
@@ -189,27 +189,27 @@ class Mpesa_Reports {
             <!-- Charts Section -->
             <div class="mpesa-reports-charts">
                 <div class="chart-container" style="width: 48%; display: inline-block; vertical-align: top;">
-                    <h2><?php esc_html_e('Daily Revenue', 'mpesa-till-gateway'); ?></h2>
+                    <h2><?php esc_html_e('Daily Revenue', 'mpesa-gateway-for-woocommerce'); ?></h2>
                     <canvas id="revenueChart"></canvas>
                 </div>
 
                 <div class="chart-container" style="width: 48%; display: inline-block; vertical-align: top; margin-left: 3%;">
-                    <h2><?php esc_html_e('Payment Status Distribution', 'mpesa-till-gateway'); ?></h2>
+                    <h2><?php esc_html_e('Payment Status Distribution', 'mpesa-gateway-for-woocommerce'); ?></h2>
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
 
             <!-- Top Customers Table -->
             <div class="mpesa-reports-table">
-                <h2><?php esc_html_e('Top Customers', 'mpesa-till-gateway'); ?></h2>
+                <h2><?php esc_html_e('Top Customers', 'mpesa-gateway-for-woocommerce'); ?></h2>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e('Rank', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Phone Number', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Total Transactions', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Total Amount', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Success Rate', 'mpesa-till-gateway'); ?></th>
+                            <th><?php esc_html_e('Rank', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Phone Number', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Total Transactions', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Total Amount', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Success Rate', 'mpesa-gateway-for-woocommerce'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -231,7 +231,7 @@ class Mpesa_Reports {
                         <?php else: ?>
                             <tr>
                                 <td colspan="5" style="text-align: center;">
-                                    <?php esc_html_e('No data available for selected period.', 'mpesa-till-gateway'); ?>
+                                    <?php esc_html_e('No data available for selected period.', 'mpesa-gateway-for-woocommerce'); ?>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -250,14 +250,14 @@ class Mpesa_Reports {
                 data: {
                     labels: <?php echo json_encode(array_column($daily_data, 'date')); ?>,
                     datasets: [{
-                        label: '<?php esc_html_e('Revenue', 'mpesa-till-gateway'); ?>',
+                        label: '<?php esc_html_e('Revenue', 'mpesa-gateway-for-woocommerce'); ?>',
                         data: <?php echo json_encode(array_column($daily_data, 'revenue')); ?>,
                         borderColor: '#0f834d',
                         backgroundColor: 'rgba(15, 131, 77, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
-                        label: '<?php esc_html_e('Transactions', 'mpesa-till-gateway'); ?>',
+                        label: '<?php esc_html_e('Transactions', 'mpesa-gateway-for-woocommerce'); ?>',
                         data: <?php echo json_encode(array_column($daily_data, 'count')); ?>,
                         borderColor: '#2271b1',
                         backgroundColor: 'rgba(34, 113, 177, 0.1)',
@@ -280,7 +280,7 @@ class Mpesa_Reports {
                             position: 'left',
                             title: {
                                 display: true,
-                                text: '<?php esc_html_e('Revenue (KES)', 'mpesa-till-gateway'); ?>'
+                                text: '<?php esc_html_e('Revenue (KES)', 'mpesa-gateway-for-woocommerce'); ?>'
                             }
                         },
                         y1: {
@@ -289,7 +289,7 @@ class Mpesa_Reports {
                             position: 'right',
                             title: {
                                 display: true,
-                                text: '<?php esc_html_e('Transactions', 'mpesa-till-gateway'); ?>'
+                                text: '<?php esc_html_e('Transactions', 'mpesa-gateway-for-woocommerce'); ?>'
                             },
                             grid: {
                                 drawOnChartArea: false
@@ -304,7 +304,7 @@ class Mpesa_Reports {
             var statusChart = new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['<?php esc_html_e('Completed', 'mpesa-till-gateway'); ?>', '<?php esc_html_e('Pending', 'mpesa-till-gateway'); ?>', '<?php esc_html_e('Failed', 'mpesa-till-gateway'); ?>'],
+                    labels: ['<?php esc_html_e('Completed', 'mpesa-gateway-for-woocommerce'); ?>', '<?php esc_html_e('Pending', 'mpesa-gateway-for-woocommerce'); ?>', '<?php esc_html_e('Failed', 'mpesa-gateway-for-woocommerce'); ?>'],
                     datasets: [{
                         data: [
                             <?php echo (int) $status_breakdown->completed; ?>,
@@ -527,7 +527,7 @@ add_action('admin_post_mpesa_export_report', function() {
     check_admin_referer('mpesa_export_report', 'nonce');
 
     if (!current_user_can('manage_woocommerce')) {
-        wp_die(__('You do not have permission to perform this action.', 'mpesa-till-gateway'));
+        wp_die(__('You do not have permission to perform this action.', 'mpesa-gateway-for-woocommerce'));
     }
 
     $date_from = isset($_GET['date_from']) ? sanitize_text_field(wp_unslash($_GET['date_from'])) : gmdate('Y-m-01');

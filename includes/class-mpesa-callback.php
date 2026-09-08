@@ -177,7 +177,7 @@ class Mpesa_Callback {
 
                 $order->update_status('on-hold', sprintf(
                     /* translators: 1: amount reported by M-Pesa, 2: the order total, 3: the M-Pesa receipt number */
-                    __('M-Pesa reported a paid amount (KES %1$s) that does not match the order total (KES %2$s). NOT marked as paid automatically -- verify manually before fulfilling. Receipt: %3$s', 'mpesa-till-gateway'),
+                    __('M-Pesa reported a paid amount (KES %1$s) that does not match the order total (KES %2$s). NOT marked as paid automatically -- verify manually before fulfilling. Receipt: %3$s', 'mpesa-gateway-for-woocommerce'),
                     number_format((float) $amount, 2),
                     number_format($expected_amount, 2),
                     $transaction_id
@@ -212,7 +212,7 @@ class Mpesa_Callback {
             $order->payment_complete($transaction_id);
             $order->update_status('processing', sprintf(
                 /* translators: 1: the M-Pesa receipt number, 2: the amount paid, 3: the customer phone number */
-                __('M-Pesa payment received and confirmed. Transaction ID: %1$s, Amount: KES %2$s, Phone: %3$s', 'mpesa-till-gateway'),
+                __('M-Pesa payment received and confirmed. Transaction ID: %1$s, Amount: KES %2$s, Phone: %3$s', 'mpesa-gateway-for-woocommerce'),
                 $transaction_id,
                 number_format($amount, 2),
                 $phone
@@ -220,7 +220,7 @@ class Mpesa_Callback {
 
             $order->add_order_note(sprintf(
                 /* translators: 1: the M-Pesa receipt number, 2: the amount paid, 3: the M-Pesa transaction date */
-                __('Payment confirmed via M-Pesa callback. Receipt: %1$s, Amount: KES %2$s, Date: %3$s', 'mpesa-till-gateway'),
+                __('Payment confirmed via M-Pesa callback. Receipt: %1$s, Amount: KES %2$s, Date: %3$s', 'mpesa-gateway-for-woocommerce'),
                 $transaction_id,
                 number_format($amount, 2),
                 $transaction_date
@@ -265,7 +265,7 @@ class Mpesa_Callback {
 
             $order->update_status('failed', sprintf(
                 /* translators: %s: the failure reason reported by M-Pesa */
-                __('M-Pesa payment failed: %s', 'mpesa-till-gateway'),
+                __('M-Pesa payment failed: %s', 'mpesa-gateway-for-woocommerce'),
                 $result_desc
             ));
 

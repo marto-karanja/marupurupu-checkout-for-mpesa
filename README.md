@@ -1,4 +1,4 @@
-# M-Pesa Till Gateway for WooCommerce
+# M-Pesa Gateway for WooCommerce
 
 Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. Supports both classic shortcode-based checkout and modern block-based checkout.
 
@@ -26,7 +26,7 @@ Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. 
 
 ## Installation
 
-1. Download the latest release, or clone this repo, into `wp-content/plugins/mpesa-till-gateway/`
+1. Download the latest release, or clone this repo, into `wp-content/plugins/mpesa-gateway-for-woocommerce/`
 2. Activate the plugin from the WordPress **Plugins** menu
 3. Go to **WooCommerce > Settings > Payments** and enable "M-Pesa Till Payment"
 4. Click **Manage** and enter your Business Short Code (Till Number), Consumer Key, Consumer Secret, and Passkey from the [Safaricom Daraja Portal](https://developer.safaricom.co.ke/)
@@ -39,7 +39,7 @@ See `readme.txt` for the full WordPress.org-formatted documentation, FAQ, and ch
 
 | File | Responsibility |
 |---|---|
-| `mpesa-till-gateway.php` | Plugin entry point — registers the gateway and WooCommerce Blocks support |
+| `mpesa-gateway-for-woocommerce.php` | Plugin entry point — registers the gateway and WooCommerce Blocks support |
 | `includes/class-wc-mpesa-till-gateway.php` | `WC_Payment_Gateway` subclass — checkout fields, `process_payment()`, settings form |
 | `includes/class-mpesa-api.php` | Daraja API client — OAuth token, STK Push, status query |
 | `includes/class-mpesa-callback.php` | Handles the Safaricom → site payment webhook |

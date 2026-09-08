@@ -38,20 +38,20 @@ class Mpesa_Ajax {
         $order_key = isset($_POST['order_key']) ? sanitize_text_field(wp_unslash($_POST['order_key'])) : '';
 
         if (!$order_id) {
-            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-gateway-for-woocommerce')));
         }
 
         $order = wc_get_order($order_id);
 
         if (!$order || $order->get_order_key() !== $order_key) {
-            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-gateway-for-woocommerce')));
         }
 
         // Get transaction
         $transaction = Mpesa_Helpers::get_transaction_by_order_id($order_id);
 
         if (!$transaction) {
-            wp_send_json_error(array('message' => __('No transaction found.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('No transaction found.', 'mpesa-gateway-for-woocommerce')));
         }
 
         $response = array(
@@ -67,15 +67,15 @@ class Mpesa_Ajax {
         // Determine if payment is complete
         if ($transaction->status === 'completed' || $order->get_status() === 'processing') {
             $response['complete'] = true;
-            $response['message'] = __('Payment confirmed! Your order is being processed.', 'mpesa-till-gateway');
+            $response['message'] = __('Payment confirmed! Your order is being processed.', 'mpesa-gateway-for-woocommerce');
         } elseif ($transaction->status === 'failed') {
             $response['complete'] = false;
             $response['failed'] = true;
             /* translators: %s: the payment failure reason reported by M-Pesa */
-            $response['message'] = sprintf(__('Payment failed: %s', 'mpesa-till-gateway'), $transaction->result_desc);
+            $response['message'] = sprintf(__('Payment failed: %s', 'mpesa-gateway-for-woocommerce'), $transaction->result_desc);
         } else {
             $response['complete'] = false;
-            $response['message'] = __('Waiting for payment confirmation...', 'mpesa-till-gateway');
+            $response['message'] = __('Waiting for payment confirmation...', 'mpesa-gateway-for-woocommerce');
         }
 
         wp_send_json_success($response);
@@ -92,18 +92,18 @@ class Mpesa_Ajax {
         $phone = isset($_POST['phone']) ? sanitize_text_field(wp_unslash($_POST['phone'])) : '';
 
         if (!$order_id) {
-            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-gateway-for-woocommerce')));
         }
 
         $order = wc_get_order($order_id);
 
         if (!$order || $order->get_order_key() !== $order_key) {
-            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-gateway-for-woocommerce')));
         }
 
         // Validate phone number
         if (!preg_match('/^254[0-9]{9}$/', $phone)) {
-            wp_send_json_error(array('message' => __('Please enter a valid phone number (format: 254XXXXXXXXX).', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Please enter a valid phone number (format: 254XXXXXXXXX).', 'mpesa-gateway-for-woocommerce')));
         }
 
         // Rate limit: this is a nopriv endpoint gated only by order_key
@@ -118,7 +118,7 @@ class Mpesa_Ajax {
         $rate_limit_key = 'mpesa_retry_rl_' . $order_id;
         $attempts = (int) get_transient($rate_limit_key);
         if ($attempts >= 3) {
-            wp_send_json_error(array('message' => __('Too many payment retry attempts for this order. Please wait a few minutes and try again.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Too many payment retry attempts for this order. Please wait a few minutes and try again.', 'mpesa-gateway-for-woocommerce')));
         }
         set_transient($rate_limit_key, $attempts + 1, 10 * MINUTE_IN_SECONDS);
 
@@ -126,7 +126,7 @@ class Mpesa_Ajax {
         $gateway = WC()->payment_gateways()->payment_gateways()['mpesa_till'];
 
         if (!$gateway) {
-            wp_send_json_error(array('message' => __('Payment gateway not available.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Payment gateway not available.', 'mpesa-gateway-for-woocommerce')));
         }
 
         // Initialize M-Pesa API
@@ -168,20 +168,20 @@ class Mpesa_Ajax {
 
             $order->add_order_note(sprintf(
                 /* translators: 1: the customer phone number, 2: the M-Pesa merchant request ID */
-                __('Payment retry initiated by customer. Phone: %1$s, MerchantRequestID: %2$s', 'mpesa-till-gateway'),
+                __('Payment retry initiated by customer. Phone: %1$s, MerchantRequestID: %2$s', 'mpesa-gateway-for-woocommerce'),
                 $phone,
                 $response['MerchantRequestID']
             ));
 
             wp_send_json_success(array(
-                'message' => __('Payment request sent! Please check your phone and enter your M-Pesa PIN.', 'mpesa-till-gateway'),
+                'message' => __('Payment request sent! Please check your phone and enter your M-Pesa PIN.', 'mpesa-gateway-for-woocommerce'),
                 'merchant_request_id' => $response['MerchantRequestID']
             ));
         } else {
-            $error_message = isset($response['errorMessage']) ? $response['errorMessage'] : __('Unable to initiate payment.', 'mpesa-till-gateway');
+            $error_message = isset($response['errorMessage']) ? $response['errorMessage'] : __('Unable to initiate payment.', 'mpesa-gateway-for-woocommerce');
 
             /* translators: %s: the error message returned by the M-Pesa API */
-            $order->add_order_note(sprintf(__('Payment retry failed: %s', 'mpesa-till-gateway'), $error_message));
+            $order->add_order_note(sprintf(__('Payment retry failed: %s', 'mpesa-gateway-for-woocommerce'), $error_message));
 
             wp_send_json_error(array('message' => $error_message));
         }
@@ -198,17 +198,17 @@ class Mpesa_Ajax {
         $transaction_code = isset($_POST['transaction_code']) ? strtoupper(sanitize_text_field(wp_unslash($_POST['transaction_code']))) : '';
 
         if (!$order_id) {
-            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order ID.', 'mpesa-gateway-for-woocommerce')));
         }
 
         $order = wc_get_order($order_id);
 
         if (!$order || $order->get_order_key() !== $order_key) {
-            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Invalid order.', 'mpesa-gateway-for-woocommerce')));
         }
 
         if (empty($transaction_code)) {
-            wp_send_json_error(array('message' => __('Please enter the M-Pesa transaction code.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('Please enter the M-Pesa transaction code.', 'mpesa-gateway-for-woocommerce')));
         }
 
         // Update transaction with customer-provided code
@@ -237,21 +237,21 @@ class Mpesa_Ajax {
 
             $order->update_status('on-hold', sprintf(
                 /* translators: %s: the M-Pesa transaction code the customer entered */
-                __('Customer provided M-Pesa code: %s. Awaiting admin verification.', 'mpesa-till-gateway'),
+                __('Customer provided M-Pesa code: %s. Awaiting admin verification.', 'mpesa-gateway-for-woocommerce'),
                 $transaction_code
             ));
 
             $order->add_order_note(sprintf(
                 /* translators: %s: the M-Pesa transaction code the customer entered */
-                __('Customer submitted M-Pesa transaction code: %s. Please verify this payment manually.', 'mpesa-till-gateway'),
+                __('Customer submitted M-Pesa transaction code: %s. Please verify this payment manually.', 'mpesa-gateway-for-woocommerce'),
                 $transaction_code
             ));
 
             wp_send_json_success(array(
-                'message' => __('Thank you! Your transaction code has been submitted. We will verify and confirm your payment shortly.', 'mpesa-till-gateway')
+                'message' => __('Thank you! Your transaction code has been submitted. We will verify and confirm your payment shortly.', 'mpesa-gateway-for-woocommerce')
             ));
         } else {
-            wp_send_json_error(array('message' => __('No transaction found for this order.', 'mpesa-till-gateway')));
+            wp_send_json_error(array('message' => __('No transaction found for this order.', 'mpesa-gateway-for-woocommerce')));
         }
     }
 }

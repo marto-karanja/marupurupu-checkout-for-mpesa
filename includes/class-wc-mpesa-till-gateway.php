@@ -41,8 +41,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         $this->id = 'mpesa_till';
         $this->icon = '';
         $this->has_fields = true;
-        $this->method_title = __('M-Pesa Till Payment', 'mpesa-till-gateway');
-        $this->method_description = __('Accept M-Pesa payments via STK Push for Till Numbers', 'mpesa-till-gateway');
+        $this->method_title = __('M-Pesa Till Payment', 'mpesa-gateway-for-woocommerce');
+        $this->method_description = __('Accept M-Pesa payments via STK Push for Till Numbers', 'mpesa-gateway-for-woocommerce');
 
         // Load settings
         $this->init_form_fields();
@@ -103,93 +103,93 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
     public function init_form_fields() {
         $this->form_fields = array(
             'enabled' => array(
-                'title' => __('Enable/Disable', 'mpesa-till-gateway'),
+                'title' => __('Enable/Disable', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'checkbox',
-                'label' => __('Enable M-Pesa Till Payment', 'mpesa-till-gateway'),
+                'label' => __('Enable M-Pesa Till Payment', 'mpesa-gateway-for-woocommerce'),
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', 'mpesa-till-gateway'),
+                'title' => __('Title', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Payment method title that customers see during checkout.', 'mpesa-till-gateway'),
-                'default' => __('M-Pesa', 'mpesa-till-gateway'),
+                'description' => __('Payment method title that customers see during checkout.', 'mpesa-gateway-for-woocommerce'),
+                'default' => __('M-Pesa', 'mpesa-gateway-for-woocommerce'),
                 'desc_tip' => true,
             ),
             'description' => array(
-                'title' => __('Description', 'mpesa-till-gateway'),
+                'title' => __('Description', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'textarea',
-                'description' => __('Payment method description that customers see during checkout.', 'mpesa-till-gateway'),
-                'default' => __('Pay securely using M-Pesa.', 'mpesa-till-gateway'),
+                'description' => __('Payment method description that customers see during checkout.', 'mpesa-gateway-for-woocommerce'),
+                'default' => __('Pay securely using M-Pesa.', 'mpesa-gateway-for-woocommerce'),
                 'desc_tip' => true,
             ),
             'testmode' => array(
-                'title' => __('Test Mode', 'mpesa-till-gateway'),
+                'title' => __('Test Mode', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'checkbox',
-                'label' => __('Enable Test Mode', 'mpesa-till-gateway'),
+                'label' => __('Enable Test Mode', 'mpesa-gateway-for-woocommerce'),
                 'default' => 'yes',
-                'description' => __('Use sandbox API credentials for testing.', 'mpesa-till-gateway'),
+                'description' => __('Use sandbox API credentials for testing.', 'mpesa-gateway-for-woocommerce'),
             ),
             'shortcode' => array(
-                'title' => __('Business Shortcode', 'mpesa-till-gateway'),
+                'title' => __('Business Shortcode', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa Business Shortcode (used for authentication). For sandbox, use 174379.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa Business Shortcode (used for authentication). For sandbox, use 174379.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'till_number' => array(
-                'title' => __('Till Number', 'mpesa-till-gateway'),
+                'title' => __('Till Number', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa Till Number (Store Number). This can be the same as Shortcode for Till accounts.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa Till Number (Store Number). This can be the same as Shortcode for Till accounts.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'consumer_key' => array(
-                'title' => __('Consumer Key (Live)', 'mpesa-till-gateway'),
+                'title' => __('Consumer Key (Live)', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa API Consumer Key for production.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa API Consumer Key for production.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'consumer_secret' => array(
-                'title' => __('Consumer Secret (Live)', 'mpesa-till-gateway'),
+                'title' => __('Consumer Secret (Live)', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Consumer Secret for production.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa API Consumer Secret for production.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'test_consumer_key' => array(
-                'title' => __('Consumer Key (Test)', 'mpesa-till-gateway'),
+                'title' => __('Consumer Key (Test)', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa API Consumer Key for sandbox.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa API Consumer Key for sandbox.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'test_consumer_secret' => array(
-                'title' => __('Consumer Secret (Test)', 'mpesa-till-gateway'),
+                'title' => __('Consumer Secret (Test)', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Consumer Secret for sandbox.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa API Consumer Secret for sandbox.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'passkey' => array(
-                'title' => __('Passkey', 'mpesa-till-gateway'),
+                'title' => __('Passkey', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Passkey.', 'mpesa-till-gateway'),
+                'description' => __('Your M-Pesa API Passkey.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'callback_url' => array(
-                'title' => __('Callback URL', 'mpesa-till-gateway'),
+                'title' => __('Callback URL', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'text',
-                'description' => __('Use this exact URL for the M-Pesa callback. It includes a secret token unique to this site; requests without a matching token are rejected. Do not edit or truncate it.', 'mpesa-till-gateway'),
+                'description' => __('Use this exact URL for the M-Pesa callback. It includes a secret token unique to this site; requests without a matching token are rejected. Do not edit or truncate it.', 'mpesa-gateway-for-woocommerce'),
                 'default' => '',
                 'custom_attributes' => array('readonly' => 'readonly'),
             ),
             'telemetry_enabled' => array(
-                'title' => __('Anonymous Usage Data', 'mpesa-till-gateway'),
+                'title' => __('Anonymous Usage Data', 'mpesa-gateway-for-woocommerce'),
                 'type' => 'checkbox',
-                'label' => __('Help improve this plugin by sharing anonymous usage data', 'mpesa-till-gateway'),
-                'description' => __('We collect anonymous usage statistics to improve the plugin (WordPress/WooCommerce/PHP versions, transaction counts and amount aggregates, error rates, feature usage). No phone numbers, order details, customer names, or M-Pesa credentials are ever included. Opt-in, off by default. See this plugin\'s Privacy Policy section (readme.txt) for the full field-by-field disclosure.', 'mpesa-till-gateway'),
+                'label' => __('Help improve this plugin by sharing anonymous usage data', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('We collect anonymous usage statistics to improve the plugin (WordPress/WooCommerce/PHP versions, transaction counts and amount aggregates, error rates, feature usage). No phone numbers, order details, customer names, or M-Pesa credentials are ever included. Opt-in, off by default. See this plugin\'s Privacy Policy section (readme.txt) for the full field-by-field disclosure.', 'mpesa-gateway-for-woocommerce'),
                 'default' => 'no',
             ),
         );
@@ -206,14 +206,14 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         <fieldset id="wc-<?php echo esc_attr($this->id); ?>-form" class="wc-payment-form">
             <p class="form-row form-row-wide">
                 <label for="mpesa_phone_number">
-                    <?php esc_html_e('M-Pesa Phone Number', 'mpesa-till-gateway'); ?> <span class="required">*</span>
+                    <?php esc_html_e('M-Pesa Phone Number', 'mpesa-gateway-for-woocommerce'); ?> <span class="required">*</span>
                 </label>
                 <input id="mpesa_phone_number" name="mpesa_phone_number" type="tel"
                        placeholder="254XXXXXXXXX"
                        pattern="254[0-9]{9}"
                        maxlength="12"
                        required />
-                <small><?php esc_html_e('Enter phone number in format: 254XXXXXXXXX', 'mpesa-till-gateway'); ?></small>
+                <small><?php esc_html_e('Enter phone number in format: 254XXXXXXXXX', 'mpesa-gateway-for-woocommerce'); ?></small>
             </p>
         </fieldset>
         <?php
@@ -224,14 +224,14 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     public function validate_fields() {
         if (empty($_POST['mpesa_phone_number'])) {
-            wc_add_notice(__('M-Pesa phone number is required.', 'mpesa-till-gateway'), 'error');
+            wc_add_notice(__('M-Pesa phone number is required.', 'mpesa-gateway-for-woocommerce'), 'error');
             return false;
         }
 
         $phone = sanitize_text_field(wp_unslash($_POST['mpesa_phone_number']));
 
         if (!preg_match('/^254[0-9]{9}$/', $phone)) {
-            wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'mpesa-till-gateway'), 'error');
+            wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'mpesa-gateway-for-woocommerce'), 'error');
             return false;
         }
 
@@ -272,12 +272,12 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             $this->save_transaction($order_id, $phone, $order->get_total(), $response);
 
             // Mark order as on-hold (waiting for payment confirmation)
-            $order->update_status('on-hold', __('M-Pesa STK Push sent. Awaiting payment confirmation.', 'mpesa-till-gateway'));
+            $order->update_status('on-hold', __('M-Pesa STK Push sent. Awaiting payment confirmation.', 'mpesa-gateway-for-woocommerce'));
 
             // Add order note
             $order->add_order_note(sprintf(
                 /* translators: 1: the M-Pesa merchant request ID, 2: the M-Pesa checkout request ID */
-                __('M-Pesa STK Push initiated. MerchantRequestID: %1$s, CheckoutRequestID: %2$s. Customer should enter M-Pesa PIN on their phone.', 'mpesa-till-gateway'),
+                __('M-Pesa STK Push initiated. MerchantRequestID: %1$s, CheckoutRequestID: %2$s. Customer should enter M-Pesa PIN on their phone.', 'mpesa-gateway-for-woocommerce'),
                 $response['MerchantRequestID'],
                 $response['CheckoutRequestID']
             ));
@@ -295,7 +295,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             );
         } else {
             // Extract error message from response
-            $error_message = __('Unable to initiate M-Pesa payment.', 'mpesa-till-gateway');
+            $error_message = __('Unable to initiate M-Pesa payment.', 'mpesa-gateway-for-woocommerce');
 
             if (isset($response['errorMessage'])) {
                 $error_message = $response['errorMessage'];
@@ -305,7 +305,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
                 $error_message = $response['CustomerMessage'];
             } elseif (isset($response['errorCode'])) {
                 /* translators: %s: the M-Pesa API error code */
-                $error_message = sprintf(__('M-Pesa Error: %s', 'mpesa-till-gateway'), $response['errorCode']);
+                $error_message = sprintf(__('M-Pesa Error: %s', 'mpesa-gateway-for-woocommerce'), $response['errorCode']);
             }
 
             // Log full response for debugging
@@ -316,7 +316,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             wc_add_notice($error_message, 'error');
 
             /* translators: %s: the payment failure reason */
-            $order->add_order_note(sprintf(__('M-Pesa payment failed: %s', 'mpesa-till-gateway'), $error_message));
+            $order->add_order_note(sprintf(__('M-Pesa payment failed: %s', 'mpesa-gateway-for-woocommerce'), $error_message));
 
             return array(
                 'result' => 'fail',
@@ -416,7 +416,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
                 // error instead.
                 $this->add_error(sprintf(
                     /* translators: %s: settings field name */
-                    __('Could not encrypt the %s field -- the new value was not saved. Check that the OpenSSL PHP extension is enabled on this server.', 'mpesa-till-gateway'),
+                    __('Could not encrypt the %s field -- the new value was not saved. Check that the OpenSSL PHP extension is enabled on this server.', 'mpesa-gateway-for-woocommerce'),
                     $field
                 ));
                 $existing = $this->get_option($field, '');
@@ -450,8 +450,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     private function credential_field_description($original_description, $has_saved_value) {
         $note = $has_saved_value
-            ? __('A value is saved (masked above). Click "Change" to replace it.', 'mpesa-till-gateway')
-            : __('No value currently saved.', 'mpesa-till-gateway');
+            ? __('A value is saved (masked above). Click "Change" to replace it.', 'mpesa-gateway-for-woocommerce')
+            : __('No value currently saved.', 'mpesa-gateway-for-woocommerce');
 
         return trim($original_description . ' ' . $note);
     }
@@ -522,8 +522,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         ob_start();
         ?>
         <span id="<?php echo esc_attr($field_key); ?>_masked" style="font-family: monospace; letter-spacing: 2px; display: inline-block; padding: 0 4px;"><?php echo esc_html($masked); ?></span>
-        <button type="button" id="<?php echo esc_attr($field_key); ?>_change" class="button button-small" onclick="mpesaEditCredential('<?php echo esc_js($field_key); ?>')"><?php esc_html_e('Change', 'mpesa-till-gateway'); ?></button>
-        <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="display: none; <?php echo esc_attr($data['css']); ?>" value="" placeholder="<?php echo esc_attr__('Enter a new value to replace it', 'mpesa-till-gateway'); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
+        <button type="button" id="<?php echo esc_attr($field_key); ?>_change" class="button button-small" onclick="mpesaEditCredential('<?php echo esc_js($field_key); ?>')"><?php esc_html_e('Change', 'mpesa-gateway-for-woocommerce'); ?></button>
+        <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="display: none; <?php echo esc_attr($data['css']); ?>" value="" placeholder="<?php echo esc_attr__('Enter a new value to replace it', 'mpesa-gateway-for-woocommerce'); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
         <?php
         if (!self::$credential_edit_script_printed) {
             self::$credential_edit_script_printed = true;

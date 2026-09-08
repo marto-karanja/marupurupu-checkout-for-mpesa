@@ -23,8 +23,8 @@ class Mpesa_Admin_Page {
     public static function add_menu_page() {
         add_submenu_page(
             'woocommerce',
-            __('M-Pesa Transactions', 'mpesa-till-gateway'),
-            __('M-Pesa Transactions', 'mpesa-till-gateway'),
+            __('M-Pesa Transactions', 'mpesa-gateway-for-woocommerce'),
+            __('M-Pesa Transactions', 'mpesa-gateway-for-woocommerce'),
             'manage_woocommerce',
             'mpesa-transactions',
             array(__CLASS__, 'render_page')
@@ -95,30 +95,30 @@ class Mpesa_Admin_Page {
 
         ?>
         <div class="wrap">
-            <h1 class="wp-heading-inline"><?php esc_html_e('M-Pesa Transactions', 'mpesa-till-gateway'); ?></h1>
+            <h1 class="wp-heading-inline"><?php esc_html_e('M-Pesa Transactions', 'mpesa-gateway-for-woocommerce'); ?></h1>
             <hr class="wp-header-end">
 
             <!-- Statistics Cards -->
             <div class="mpesa-stats">
                 <div class="mpesa-stat-card">
                     <h3><?php echo number_format($stats->total); ?></h3>
-                    <p><?php esc_html_e('Total Transactions', 'mpesa-till-gateway'); ?></p>
+                    <p><?php esc_html_e('Total Transactions', 'mpesa-gateway-for-woocommerce'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-success">
                     <h3><?php echo number_format($stats->completed); ?></h3>
-                    <p><?php esc_html_e('Completed', 'mpesa-till-gateway'); ?></p>
+                    <p><?php esc_html_e('Completed', 'mpesa-gateway-for-woocommerce'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-pending">
                     <h3><?php echo number_format($stats->pending); ?></h3>
-                    <p><?php esc_html_e('Pending', 'mpesa-till-gateway'); ?></p>
+                    <p><?php esc_html_e('Pending', 'mpesa-gateway-for-woocommerce'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-failed">
                     <h3><?php echo number_format($stats->failed); ?></h3>
-                    <p><?php esc_html_e('Failed', 'mpesa-till-gateway'); ?></p>
+                    <p><?php esc_html_e('Failed', 'mpesa-gateway-for-woocommerce'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-amount">
                     <h3><?php echo wc_price($stats->total_amount); ?></h3>
-                    <p><?php esc_html_e('Total Revenue', 'mpesa-till-gateway'); ?></p>
+                    <p><?php esc_html_e('Total Revenue', 'mpesa-gateway-for-woocommerce'); ?></p>
                 </div>
             </div>
 
@@ -128,18 +128,18 @@ class Mpesa_Admin_Page {
                 <div class="tablenav top">
                     <div class="alignleft actions">
                         <select name="status">
-                            <option value=""><?php esc_html_e('All Statuses', 'mpesa-till-gateway'); ?></option>
-                            <option value="completed" <?php selected($status_filter, 'completed'); ?>><?php esc_html_e('Completed', 'mpesa-till-gateway'); ?></option>
-                            <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'mpesa-till-gateway'); ?></option>
-                            <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'mpesa-till-gateway'); ?></option>
+                            <option value=""><?php esc_html_e('All Statuses', 'mpesa-gateway-for-woocommerce'); ?></option>
+                            <option value="completed" <?php selected($status_filter, 'completed'); ?>><?php esc_html_e('Completed', 'mpesa-gateway-for-woocommerce'); ?></option>
+                            <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'mpesa-gateway-for-woocommerce'); ?></option>
+                            <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'mpesa-gateway-for-woocommerce'); ?></option>
                         </select>
-                        <input type="submit" class="button" value="<?php esc_html_e('Filter', 'mpesa-till-gateway'); ?>">
+                        <input type="submit" class="button" value="<?php esc_html_e('Filter', 'mpesa-gateway-for-woocommerce'); ?>">
                     </div>
                     <div class="alignleft actions">
-                        <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_html_e('Search by order ID, receipt, or phone...', 'mpesa-till-gateway'); ?>">
-                        <input type="submit" class="button" value="<?php esc_html_e('Search', 'mpesa-till-gateway'); ?>">
+                        <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_html_e('Search by order ID, receipt, or phone...', 'mpesa-gateway-for-woocommerce'); ?>">
+                        <input type="submit" class="button" value="<?php esc_html_e('Search', 'mpesa-gateway-for-woocommerce'); ?>">
                         <?php if ($search || $status_filter): ?>
-                            <a href="?page=mpesa-transactions" class="button"><?php esc_html_e('Clear', 'mpesa-till-gateway'); ?></a>
+                            <a href="?page=mpesa-transactions" class="button"><?php esc_html_e('Clear', 'mpesa-gateway-for-woocommerce'); ?></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -152,20 +152,20 @@ class Mpesa_Admin_Page {
                     <thead>
                         <tr>
                             <td class="check-column"><input type="checkbox" id="cb-select-all"></td>
-                            <th><?php esc_html_e('Order', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Receipt', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Phone', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Amount', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Status', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Date', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Actions', 'mpesa-till-gateway'); ?></th>
+                            <th><?php esc_html_e('Order', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Receipt', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Phone', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Amount', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Status', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Date', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Actions', 'mpesa-gateway-for-woocommerce'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($transactions)): ?>
                             <tr>
                                 <td colspan="8" style="text-align: center; padding: 20px;">
-                                    <?php esc_html_e('No transactions found.', 'mpesa-till-gateway'); ?>
+                                    <?php esc_html_e('No transactions found.', 'mpesa-gateway-for-woocommerce'); ?>
                                 </td>
                             </tr>
                         <?php else: ?>
@@ -203,7 +203,7 @@ class Mpesa_Admin_Page {
                                     </td>
                                     <td>
                                         <a href="<?php echo esc_url(get_edit_post_link($transaction->order_id)); ?>" class="button button-small">
-                                            <?php esc_html_e('View Order', 'mpesa-till-gateway'); ?>
+                                            <?php esc_html_e('View Order', 'mpesa-gateway-for-woocommerce'); ?>
                                         </a>
                                     </td>
                                 </tr>
@@ -213,13 +213,13 @@ class Mpesa_Admin_Page {
                     <tfoot>
                         <tr>
                             <td class="check-column"><input type="checkbox"></td>
-                            <th><?php esc_html_e('Order', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Receipt', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Phone', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Amount', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Status', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Date', 'mpesa-till-gateway'); ?></th>
-                            <th><?php esc_html_e('Actions', 'mpesa-till-gateway'); ?></th>
+                            <th><?php esc_html_e('Order', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Receipt', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Phone', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Amount', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Status', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Date', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Actions', 'mpesa-gateway-for-woocommerce'); ?></th>
                         </tr>
                     </tfoot>
                 </table>
@@ -228,10 +228,10 @@ class Mpesa_Admin_Page {
                 <div class="tablenav bottom">
                     <div class="alignleft actions">
                         <select name="bulk_action">
-                            <option value=""><?php esc_html_e('Bulk Actions', 'mpesa-till-gateway'); ?></option>
-                            <option value="export_csv"><?php esc_html_e('Export to CSV', 'mpesa-till-gateway'); ?></option>
+                            <option value=""><?php esc_html_e('Bulk Actions', 'mpesa-gateway-for-woocommerce'); ?></option>
+                            <option value="export_csv"><?php esc_html_e('Export to CSV', 'mpesa-gateway-for-woocommerce'); ?></option>
                         </select>
-                        <input type="submit" class="button" value="<?php esc_html_e('Apply', 'mpesa-till-gateway'); ?>">
+                        <input type="submit" class="button" value="<?php esc_html_e('Apply', 'mpesa-gateway-for-woocommerce'); ?>">
                     </div>
 
                     <!-- Pagination -->
@@ -243,7 +243,7 @@ class Mpesa_Admin_Page {
                             <span class="displaying-num">
                                 <?php
                                 /* translators: %s: number of transaction items */
-                                printf(esc_html(_n('%s item', '%s items', $total_items, 'mpesa-till-gateway')), esc_html(number_format_i18n($total_items)));
+                                printf(esc_html(_n('%s item', '%s items', $total_items, 'mpesa-gateway-for-woocommerce')), esc_html(number_format_i18n($total_items)));
                                 ?>
                             </span>
                             <?php
@@ -324,12 +324,12 @@ class Mpesa_Admin_Page {
 
         // Verify nonce
         if (!wp_verify_nonce(wp_unslash($_POST['mpesa_bulk_nonce']), 'mpesa_bulk_action')) {
-            wp_die(__('Security check failed.', 'mpesa-till-gateway'));
+            wp_die(__('Security check failed.', 'mpesa-gateway-for-woocommerce'));
         }
 
         // Check permissions
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(__('You do not have permission to perform this action.', 'mpesa-till-gateway'));
+            wp_die(__('You do not have permission to perform this action.', 'mpesa-gateway-for-woocommerce'));
         }
 
         $action = sanitize_text_field(wp_unslash($_POST['bulk_action']));

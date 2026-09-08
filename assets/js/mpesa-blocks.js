@@ -12,7 +12,7 @@ const { __ } = window.wp.i18n;
 
 // Get M-Pesa settings from server
 const settings = getSetting('mpesa_till_data', {});
-const defaultLabel = __('M-Pesa', 'mpesa-till-gateway');
+const defaultLabel = __('M-Pesa', 'mpesa-gateway-for-woocommerce');
 const label = decodeEntities(settings.title) || defaultLabel;
 
 /**

@@ -1,4 +1,4 @@
-=== M-Pesa Till Gateway for WooCommerce ===
+=== M-Pesa Gateway for WooCommerce ===
 Contributors: marto46
 Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
@@ -12,7 +12,7 @@ Accept M-Pesa Till payments via STK Push for WooCommerce. Supports both classic 
 
 == Description ==
 
-M-Pesa Till Gateway for WooCommerce allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
+M-Pesa Gateway for WooCommerce allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
 
 = Features =
 
@@ -39,7 +39,7 @@ M-Pesa Till Gateway for WooCommerce allows you to accept payments via M-Pesa (Sa
 
 = Setup =
 
-1. Upload the plugin to `/wp-content/plugins/mpesa-till-gateway/`
+1. Upload the plugin to `/wp-content/plugins/mpesa-gateway-for-woocommerce/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to WooCommerce > Settings > Payments
 4. Enable "M-Pesa Till Payment"
@@ -68,7 +68,7 @@ M-Pesa Till Gateway for WooCommerce allows you to accept payments via M-Pesa (Sa
 
 1. Log in to your WordPress dashboard
 2. Navigate to Plugins > Add New
-3. Search for "M-Pesa Till Gateway for WooCommerce"
+3. Search for "M-Pesa Gateway for WooCommerce"
 4. Click "Install Now"
 5. Activate the plugin
 
@@ -141,7 +141,7 @@ The plugin automatically generates a callback URL, including a secret token uniq
 == Changelog ==
 
 = 1.5.0 - 2026-08-31 =
-* **Renamed** from `wc-mpesa-till-payment` to `mpesa-till-gateway` (slug, folder, main file, text domain). WordPress.org restricts the term "wc" in plugin slugs — the previous name could never have been submitted. No functional change; internal identifiers, the database table, and the M-Pesa/Daraja callback URL are all unchanged, so existing installs keep working exactly as before once updated.
+* **Renamed** from `wc-mpesa-till-payment` to `mpesa-gateway-for-woocommerce` (slug, folder, main file, text domain). WordPress.org restricts the term "wc" in plugin slugs — the previous name could never have been submitted. No functional change; internal identifiers, the database table, and the M-Pesa/Daraja callback URL are all unchanged, so existing installs keep working exactly as before once updated.
 * Changed: Outbound Safaricom API calls (OAuth token, STK Push, status query) now use WordPress's own HTTP API (`wp_remote_get()`/`wp_remote_post()`) instead of calling cURL directly — same behavior (timeouts, SSL verification), but works correctly on hosts that restrict direct cURL usage and follows WordPress.org coding standards.
 * Fixed: 8 "Creation of dynamic property is deprecated" warnings on every settings-page load (PHP 8.2) — the gateway's credential fields are now properly declared class properties.
 * Fixed: numerous smaller correctness/compliance items found via a full run of the official WordPress.org Plugin Check tool — missing output escaping, missing translator comments on translatable strings with placeholders, `date()` calls affected by server timezone changed to `gmdate()`, superglobal reads missing `wp_unslash()`, `wp_redirect()` changed to `wp_safe_redirect()` for two admin actions added in 1.4.x, and a stale "Tested up to" header.

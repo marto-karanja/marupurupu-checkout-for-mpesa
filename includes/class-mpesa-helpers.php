@@ -226,7 +226,7 @@ class Mpesa_Helpers {
 
         add_meta_box(
             'mpesa_transaction_details',
-            __('M-Pesa Transaction Details', 'mpesa-till-gateway'),
+            __('M-Pesa Transaction Details', 'mpesa-gateway-for-woocommerce'),
             array(__CLASS__, 'render_mpesa_meta_box'),
             $screen,
             'side',
@@ -244,7 +244,7 @@ class Mpesa_Helpers {
             : $post_or_order_object;
 
         if (!$order) {
-            echo '<p>' . esc_html__('Unable to retrieve order.', 'mpesa-till-gateway') . '</p>';
+            echo '<p>' . esc_html__('Unable to retrieve order.', 'mpesa-gateway-for-woocommerce') . '</p>';
             return;
         }
 
@@ -252,40 +252,40 @@ class Mpesa_Helpers {
         $transaction = self::get_transaction_by_order_id($order_id);
 
         if (!$transaction) {
-            echo '<p>' . esc_html__('No M-Pesa transaction found for this order.', 'mpesa-till-gateway') . '</p>';
+            echo '<p>' . esc_html__('No M-Pesa transaction found for this order.', 'mpesa-gateway-for-woocommerce') . '</p>';
             return;
         }
 
         echo '<div class="mpesa-transaction-details">';
-        echo '<p><strong>' . esc_html__('Status:', 'mpesa-till-gateway') . '</strong> <span class="mpesa-status-' . esc_attr($transaction->status) . '">' . esc_html(ucfirst($transaction->status)) . '</span></p>';
+        echo '<p><strong>' . esc_html__('Status:', 'mpesa-gateway-for-woocommerce') . '</strong> <span class="mpesa-status-' . esc_attr($transaction->status) . '">' . esc_html(ucfirst($transaction->status)) . '</span></p>';
 
         if ($transaction->transaction_id) {
-            echo '<p><strong>' . esc_html__('M-Pesa Receipt:', 'mpesa-till-gateway') . '</strong> ' . esc_html($transaction->transaction_id) . '</p>';
+            echo '<p><strong>' . esc_html__('M-Pesa Receipt:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->transaction_id) . '</p>';
         }
 
-        echo '<p><strong>' . esc_html__('Phone Number:', 'mpesa-till-gateway') . '</strong> ' . esc_html($transaction->phone_number) . '</p>';
-        echo '<p><strong>' . esc_html__('Amount:', 'mpesa-till-gateway') . '</strong> ' . esc_html(self::format_amount($transaction->amount)) . '</p>';
+        echo '<p><strong>' . esc_html__('Phone Number:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->phone_number) . '</p>';
+        echo '<p><strong>' . esc_html__('Amount:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html(self::format_amount($transaction->amount)) . '</p>';
 
         if ($transaction->result_desc) {
-            echo '<p><strong>' . esc_html__('Result:', 'mpesa-till-gateway') . '</strong> ' . esc_html($transaction->result_desc) . '</p>';
+            echo '<p><strong>' . esc_html__('Result:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->result_desc) . '</p>';
         }
 
-        echo '<p><strong>' . esc_html__('Created:', 'mpesa-till-gateway') . '</strong> ' . esc_html($transaction->created_at) . '</p>';
+        echo '<p><strong>' . esc_html__('Created:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->created_at) . '</p>';
 
         if ($transaction->updated_at != $transaction->created_at) {
-            echo '<p><strong>' . esc_html__('Updated:', 'mpesa-till-gateway') . '</strong> ' . esc_html($transaction->updated_at) . '</p>';
+            echo '<p><strong>' . esc_html__('Updated:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->updated_at) . '</p>';
         }
 
         // Manual confirmation section for pending/failed transactions
         if (in_array($transaction->status, array('pending', 'failed')) && $order->get_status() !== 'processing') {
             echo '<hr>';
-            echo '<h4>' . esc_html__('Manual Payment Confirmation', 'mpesa-till-gateway') . '</h4>';
-            echo '<p class="description">' . esc_html__('If payment was successful but not automatically confirmed, enter the M-Pesa receipt number below:', 'mpesa-till-gateway') . '</p>';
+            echo '<h4>' . esc_html__('Manual Payment Confirmation', 'mpesa-gateway-for-woocommerce') . '</h4>';
+            echo '<p class="description">' . esc_html__('If payment was successful but not automatically confirmed, enter the M-Pesa receipt number below:', 'mpesa-gateway-for-woocommerce') . '</p>';
             echo '<form method="post" action="">';
             echo '<input type="hidden" name="mpesa_manual_confirm_nonce" value="' . esc_attr(wp_create_nonce('mpesa_manual_confirm_' . $order_id)) . '">';
             echo '<input type="hidden" name="order_id" value="' . esc_attr($order_id) . '">';
-            echo '<p><input type="text" name="mpesa_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'mpesa-till-gateway') . '" style="width: 100%;" required></p>';
-            echo '<p><button type="submit" name="mpesa_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'mpesa-till-gateway') . '</button></p>';
+            echo '<p><input type="text" name="mpesa_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'mpesa-gateway-for-woocommerce') . '" style="width: 100%;" required></p>';
+            echo '<p><button type="submit" name="mpesa_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'mpesa-gateway-for-woocommerce') . '</button></p>';
             echo '</form>';
         }
 
@@ -306,7 +306,7 @@ class Mpesa_Helpers {
         // Verify nonce
         if (!wp_verify_nonce(wp_unslash($_POST['mpesa_manual_confirm_nonce']), 'mpesa_manual_confirm_' . $order_id)) {
             add_action('admin_notices', function() {
-                echo '<div class="error"><p>' . esc_html__('Security check failed.', 'mpesa-till-gateway') . '</p></div>';
+                echo '<div class="error"><p>' . esc_html__('Security check failed.', 'mpesa-gateway-for-woocommerce') . '</p></div>';
             });
             return;
         }
@@ -314,7 +314,7 @@ class Mpesa_Helpers {
         // Check permissions
         if (!current_user_can('edit_shop_orders')) {
             add_action('admin_notices', function() {
-                echo '<div class="error"><p>' . esc_html__('You do not have permission to perform this action.', 'mpesa-till-gateway') . '</p></div>';
+                echo '<div class="error"><p>' . esc_html__('You do not have permission to perform this action.', 'mpesa-gateway-for-woocommerce') . '</p></div>';
             });
             return;
         }
@@ -346,21 +346,21 @@ class Mpesa_Helpers {
         $order->payment_complete($receipt_number);
         $order->update_status('processing', sprintf(
             /* translators: 1: the admin's display name, 2: the M-Pesa receipt number */
-            __('Payment manually confirmed by %1$s. M-Pesa Receipt: %2$s', 'mpesa-till-gateway'),
+            __('Payment manually confirmed by %1$s. M-Pesa Receipt: %2$s', 'mpesa-gateway-for-woocommerce'),
             wp_get_current_user()->display_name,
             $receipt_number
         ));
 
         $order->add_order_note(sprintf(
             /* translators: 1: the M-Pesa receipt number, 2: the admin's display name */
-            __('Payment manually verified and confirmed. Receipt Number: %1$s, Confirmed by: %2$s', 'mpesa-till-gateway'),
+            __('Payment manually verified and confirmed. Receipt Number: %1$s, Confirmed by: %2$s', 'mpesa-gateway-for-woocommerce'),
             $receipt_number,
             wp_get_current_user()->display_name
         ));
 
         add_action('admin_notices', function() use ($receipt_number) {
             /* translators: %s: the M-Pesa receipt number */
-            echo '<div class="updated"><p>' . esc_html(sprintf(__('Payment confirmed successfully. Receipt: %s', 'mpesa-till-gateway'), $receipt_number)) . '</p></div>';
+            echo '<div class="updated"><p>' . esc_html(sprintf(__('Payment confirmed successfully. Receipt: %s', 'mpesa-gateway-for-woocommerce'), $receipt_number)) . '</p></div>';
         });
     }
 }

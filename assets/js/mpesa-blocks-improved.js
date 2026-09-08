@@ -35,7 +35,7 @@
     const settings = getSetting('mpesa_till_data', {});
 
     // Fallback values
-    const defaultLabel = __('M-Pesa', 'mpesa-till-gateway');
+    const defaultLabel = __('M-Pesa', 'mpesa-gateway-for-woocommerce');
     const label = settings.title ? decodeEntities(settings.title) : defaultLabel;
     const description = settings.description ? decodeEntities(settings.description) : '';
 
@@ -58,7 +58,7 @@
                 className: 'wc-block-mpesa-till-content',
                 style: { marginTop: '10px' }
             },
-            description || __('Pay securely using M-Pesa mobile money.', 'mpesa-till-gateway')
+            description || __('Pay securely using M-Pesa mobile money.', 'mpesa-gateway-for-woocommerce')
         );
     };
 

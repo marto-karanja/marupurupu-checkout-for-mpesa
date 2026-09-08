@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: M-Pesa Till Gateway for WooCommerce
+ * Plugin Name: M-Pesa Gateway for WooCommerce
  * Plugin URI: https://billtoolbox.com
  * Description: Accept M-Pesa Till payments via STK Push for WooCommerce
  * Version: 1.5.0
  * Author: Martin Mburu
  * Author URI: https://billtoolbox.com
- * Text Domain: mpesa-till-gateway
+ * Text Domain: mpesa-gateway-for-woocommerce
  * Requires at least: 5.3
  * Requires PHP: 7.4
  * WC requires at least: 3.0
