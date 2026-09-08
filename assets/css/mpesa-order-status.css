@@ -1,0 +1,348 @@
+/**
+ * M-Pesa Order Status Styles
+ */
+
+.mpesa-order-status {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 30px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.mpesa-status-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.mpesa-status-icon.pending {
+    animation: mpesa-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mpesa-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+.mpesa-status-icon.completed {
+    color: #0f834d;
+}
+
+.mpesa-status-icon.failed {
+    color: #e2401c;
+}
+
+.mpesa-status-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.mpesa-status-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.mpesa-status-details {
+    background: #f8f8f8;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.mpesa-status-details p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.mpesa-status-details strong {
+    color: #333;
+}
+
+.mpesa-status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.mpesa-status-indicator.pending {
+    background: #ffb900;
+    animation: mpesa-blink 1s infinite;
+}
+
+.mpesa-status-indicator.completed {
+    background: #0f834d;
+}
+
+.mpesa-status-indicator.failed {
+    background: #e2401c;
+}
+
+@keyframes mpesa-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.mpesa-timer {
+    font-size: 14px;
+    color: #999;
+    margin-top: 10px;
+}
+
+/* Retry Payment Section */
+.mpesa-retry-section {
+    background: #fff9e6;
+    border: 1px solid #ffd966;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.mpesa-retry-section h3 {
+    margin-top: 0;
+    color: #b8860b;
+}
+
+.mpesa-form-group {
+    margin: 15px 0;
+    text-align: left;
+}
+
+.mpesa-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.mpesa-form-group input[type="text"],
+.mpesa-form-group input[type="tel"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.mpesa-form-group input:focus {
+    outline: none;
+    border-color: #0f834d;
+    box-shadow: 0 0 0 1px #0f834d;
+}
+
+.mpesa-form-group .description {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.mpesa-button {
+    background: #0f834d;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.mpesa-button:hover {
+    background: #0a5c36;
+}
+
+.mpesa-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.mpesa-button-secondary {
+    background: #fff;
+    color: #0f834d;
+    border: 2px solid #0f834d;
+}
+
+.mpesa-button-secondary:hover {
+    background: #f0f8f4;
+}
+
+/* Verify Code Section */
+.mpesa-verify-section {
+    background: #e8f4f8;
+    border: 1px solid #b3d9e6;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.mpesa-verify-section h3 {
+    margin-top: 0;
+    color: #1e5a6e;
+}
+
+.mpesa-verify-section .description {
+    margin-bottom: 15px;
+}
+
+.mpesa-sms-example {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.mpesa-sms-example strong {
+    color: #0f834d;
+    background: #f0f8f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+/* Messages */
+#mpesa-messages {
+    margin: 20px 0;
+}
+
+#mpesa-messages .woocommerce-message,
+#mpesa-messages .woocommerce-error,
+#mpesa-messages .woocommerce-info {
+    margin: 10px 0;
+}
+
+/* Loading Spinner */
+.mpesa-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: mpesa-spin 1s linear infinite;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+@keyframes mpesa-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mpesa-order-status {
+        padding: 20px;
+    }
+
+    .mpesa-status-icon {
+        font-size: 48px;
+    }
+
+    .mpesa-status-title {
+        font-size: 20px;
+    }
+
+    .mpesa-status-message {
+        font-size: 14px;
+    }
+
+    .mpesa-button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Instructions Box */
+.mpesa-instructions {
+    background: #f0f8f4;
+    border-left: 4px solid #0f834d;
+    padding: 15px 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.mpesa-instructions h4 {
+    margin-top: 0;
+    color: #0f834d;
+}
+
+.mpesa-instructions ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.mpesa-instructions li {
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+/* Success Checkmark */
+.mpesa-success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.mpesa-success-checkmark .circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    stroke: #0f834d;
+    fill: none;
+    animation: mpesa-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.mpesa-success-checkmark .check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 3;
+    stroke: #0f834d;
+    fill: none;
+    animation: mpesa-stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+@keyframes mpesa-stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Error X Mark */
+.mpesa-error-mark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.mpesa-error-mark .circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    stroke: #e2401c;
+    fill: none;
+    animation: mpesa-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.mpesa-error-mark .cross {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 3;
+    stroke: #e2401c;
+    fill: none;
+    animation: mpesa-stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}

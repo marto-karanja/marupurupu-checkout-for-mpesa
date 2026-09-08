@@ -1,0 +1,273 @@
+<?php
+/**
+ * M-Pesa Order Received Page Enhancement
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Mpesa_Order_Received {
+
+    /**
+     * Initialize
+     */
+    public static function init() {
+        add_action('woocommerce_thankyou_mpesa_till', array(__CLASS__, 'render_payment_status'), 10, 1);
+        add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
+    }
+
+    /**
+     * Enqueue scripts on order received page
+     */
+    public static function enqueue_scripts() {
+        if (!is_order_received_page()) {
+            return;
+        }
+
+        global $wp;
+        $order_id = absint($wp->query_vars['order-received']);
+
+        if (!$order_id) {
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+
+        if (!$order || $order->get_payment_method() !== 'mpesa_till') {
+            return;
+        }
+
+        // Enqueue CSS
+        wp_enqueue_style(
+            'mpesa-order-status',
+            WC_MPESA_TILL_PLUGIN_URL . 'assets/css/mpesa-order-status.css',
+            array(),
+            WC_MPESA_TILL_VERSION
+        );
+
+        // Enqueue JS
+        wp_enqueue_script(
+            'mpesa-order-status',
+            WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-order-status.js',
+            array('jquery'),
+            WC_MPESA_TILL_VERSION,
+            true
+        );
+
+        // Localize script
+        wp_localize_script('mpesa-order-status', 'mpesa_order_params', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'order_id' => $order_id,
+            'order_key' => $order->get_order_key(),
+            'check_status_nonce' => wp_create_nonce('mpesa_check_status'),
+            'retry_payment_nonce' => wp_create_nonce('mpesa_retry_payment'),
+            'verify_code_nonce' => wp_create_nonce('mpesa_verify_code'),
+        ));
+    }
+
+    /**
+     * Render payment status on thank you page
+     */
+    public static function render_payment_status($order_id) {
+        $order = wc_get_order($order_id);
+
+        if (!$order) {
+            return;
+        }
+
+        $transaction = Mpesa_Helpers::get_transaction_by_order_id($order_id);
+
+        if (!$transaction) {
+            return;
+        }
+
+        $order_status = $order->get_status();
+        $transaction_status = $transaction->status;
+
+        ?>
+        <div id="mpesa-messages"></div>
+
+        <?php if ($order_status === 'processing' || $transaction_status === 'completed'): ?>
+            <!-- Payment Successful -->
+            <div class="mpesa-order-status" id="mpesa-status-success">
+                <svg class="mpesa-success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+
+                <div class="mpesa-status-title" style="color: #0f834d;">
+                    <?php esc_html_e('Payment Confirmed!', 'mpesa-till-gateway'); ?>
+                </div>
+
+                <div class="mpesa-status-message">
+                    <?php esc_html_e('Your M-Pesa payment has been received and confirmed. Your order is now being processed.', 'mpesa-till-gateway'); ?>
+                </div>
+
+                <?php if ($transaction->transaction_id): ?>
+                    <div class="mpesa-status-details">
+                        <p>
+                            <strong><?php esc_html_e('M-Pesa Receipt:', 'mpesa-till-gateway'); ?></strong>
+                            <span><?php echo esc_html($transaction->transaction_id); ?></span>
+                        </p>
+                        <p>
+                            <strong><?php esc_html_e('Amount Paid:', 'mpesa-till-gateway'); ?></strong>
+                            <span><?php echo wc_price($transaction->amount); ?></span>
+                        </p>
+                        <p>
+                            <strong><?php esc_html_e('Phone Number:', 'mpesa-till-gateway'); ?></strong>
+                            <span><?php echo esc_html($transaction->phone_number); ?></span>
+                        </p>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+        <?php elseif ($transaction_status === 'failed'): ?>
+            <!-- Payment Failed -->
+            <div class="mpesa-order-status" id="mpesa-status-failed">
+                <svg class="mpesa-error-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="cross" fill="none" d="M16 16 36 36 M36 16 16 36"/>
+                </svg>
+
+                <div class="mpesa-status-title" style="color: #e2401c;">
+                    <?php esc_html_e('Payment Failed', 'mpesa-till-gateway'); ?>
+                </div>
+
+                <div class="mpesa-status-message">
+                    <?php
+                    if ($transaction->result_desc) {
+                        echo esc_html($transaction->result_desc);
+                    } else {
+                        esc_html_e('The M-Pesa payment was not completed.', 'mpesa-till-gateway');
+                    }
+                    ?>
+                </div>
+
+                <?php self::render_retry_section($order, $transaction); ?>
+            </div>
+
+        <?php else: ?>
+            <!-- Payment Pending -->
+            <div class="mpesa-order-status" id="mpesa-status-pending">
+                <div class="mpesa-status-icon pending">⏱️</div>
+
+                <div class="mpesa-status-title">
+                    <?php esc_html_e('Waiting for Payment Confirmation', 'mpesa-till-gateway'); ?>
+                </div>
+
+                <div class="mpesa-status-message">
+                    <span class="mpesa-status-indicator pending"></span>
+                    <span id="mpesa-status-text"><?php esc_html_e('Please check your phone and enter your M-Pesa PIN to complete the payment.', 'mpesa-till-gateway'); ?></span>
+                </div>
+
+                <div class="mpesa-timer">
+                    <?php esc_html_e('Time elapsed:', 'mpesa-till-gateway'); ?> <span id="mpesa-time-elapsed">0:00</span>
+                </div>
+
+                <div class="mpesa-instructions">
+                    <h4><?php esc_html_e('What to do next:', 'mpesa-till-gateway'); ?></h4>
+                    <ol>
+                        <li><?php esc_html_e('Check your phone for an M-Pesa payment prompt', 'mpesa-till-gateway'); ?></li>
+                        <li><?php esc_html_e('Enter your M-Pesa PIN to confirm payment', 'mpesa-till-gateway'); ?></li>
+                        <li><?php esc_html_e('Wait for confirmation (this page will update automatically)', 'mpesa-till-gateway'); ?></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Show retry and verify sections after initial wait -->
+            <div id="mpesa-retry-section" style="display: none;">
+                <?php self::render_retry_section($order, $transaction); ?>
+            </div>
+
+            <script>
+                // Show retry options after 2 minutes
+                setTimeout(function() {
+                    document.getElementById('mpesa-retry-section').style.display = 'block';
+                }, 120000);
+            </script>
+        <?php endif; ?>
+
+        <?php
+        // Always show verify section for pending/failed
+        if (in_array($transaction_status, array('pending', 'failed')) && $order_status !== 'processing') {
+            self::render_verify_section($order, $transaction);
+        }
+    }
+
+    /**
+     * Render retry payment section
+     */
+    private static function render_retry_section($order, $transaction) {
+        ?>
+        <div class="mpesa-retry-section">
+            <h3><?php esc_html_e('Retry Payment', 'mpesa-till-gateway'); ?></h3>
+            <p><?php esc_html_e('Didn\'t receive the payment prompt? Click below to send a new request.', 'mpesa-till-gateway'); ?></p>
+
+            <div class="mpesa-form-group">
+                <label for="mpesa-retry-phone">
+                    <?php esc_html_e('Phone Number', 'mpesa-till-gateway'); ?>
+                </label>
+                <input
+                    type="tel"
+                    id="mpesa-retry-phone"
+                    value="<?php echo esc_attr($transaction->phone_number); ?>"
+                    placeholder="254XXXXXXXXX"
+                    maxlength="12"
+                >
+                <div class="description">
+                    <?php esc_html_e('Enter the phone number to receive the M-Pesa payment prompt', 'mpesa-till-gateway'); ?>
+                </div>
+            </div>
+
+            <button type="button" id="mpesa-retry-payment" class="mpesa-button">
+                <?php esc_html_e('Send Payment Request', 'mpesa-till-gateway'); ?>
+            </button>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render verify transaction code section
+     */
+    private static function render_verify_section($order, $transaction) {
+        ?>
+        <div class="mpesa-verify-section">
+            <h3><?php esc_html_e('Already Paid?', 'mpesa-till-gateway'); ?></h3>
+            <p class="description">
+                <?php esc_html_e('If you have already completed the payment, enter your M-Pesa transaction code below to verify.', 'mpesa-till-gateway'); ?>
+            </p>
+
+            <div class="mpesa-sms-example">
+                <?php esc_html_e('Your M-Pesa confirmation SMS looks like this:', 'mpesa-till-gateway'); ?><br><br>
+                <strong>QA12BC3DEF</strong> <?php esc_html_e('Confirmed', 'mpesa-till-gateway'); ?><br>
+                <?php esc_html_e('You have paid KES', 'mpesa-till-gateway'); ?> <?php echo number_format($order->get_total(), 2); ?><br>
+                <?php esc_html_e('on', 'mpesa-till-gateway'); ?> <?php echo gmdate('d/m/Y \a\t h:i A'); ?>
+            </div>
+
+            <div class="mpesa-form-group">
+                <label for="mpesa-transaction-code">
+                    <?php esc_html_e('M-Pesa Transaction Code', 'mpesa-till-gateway'); ?>
+                </label>
+                <input
+                    type="text"
+                    id="mpesa-transaction-code"
+                    placeholder="<?php esc_html_e('e.g. QA12BC3DEF', 'mpesa-till-gateway'); ?>"
+                    maxlength="20"
+                    style="text-transform: uppercase;"
+                >
+                <div class="description">
+                    <?php esc_html_e('Enter the transaction code from your M-Pesa confirmation SMS', 'mpesa-till-gateway'); ?>
+                </div>
+            </div>
+
+            <button type="button" id="mpesa-verify-code-btn" class="mpesa-button mpesa-button-secondary">
+                <?php esc_html_e('Verify Payment', 'mpesa-till-gateway'); ?>
+            </button>
+        </div>
+        <?php
+    }
+}
+
+// Initialize
+Mpesa_Order_Received::init();
