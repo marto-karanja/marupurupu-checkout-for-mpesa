@@ -4,7 +4,7 @@ Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. 
 
 > **Independent plugin — no affiliation.** This plugin is not affiliated with, endorsed by, or sponsored by Safaricom, M-Pesa, WooCommerce or Automattic. Those names are trademarks of their respective owners and are used only to describe what the plugin works with. "Marupurupu" is a Swahili word meaning "allowances".
 
-- **Stable version:** 1.5.6
+- **Stable version:** 1.6.0
 - **Requires:** WordPress 5.3+, WooCommerce 3.0+ (5.5+ for block checkout), PHP 7.4+
 - **License:** [GPLv2 or later](LICENSE)
 

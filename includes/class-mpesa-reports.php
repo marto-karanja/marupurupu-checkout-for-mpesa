@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Reports {
+class Marupurupu_Reports {
 
     /**
      * Initialize reports page
@@ -25,7 +25,7 @@ class Mpesa_Reports {
             __('M-Pesa Payments', 'marupurupu-checkout-for-mpesa'),
             __('M-Pesa Payments', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
-            'mpesa-payments',
+            'marupurupu-payments',
             array(__CLASS__, 'render_reports_page'),
             'dashicons-money-alt',
             56
@@ -33,25 +33,25 @@ class Mpesa_Reports {
 
         // Add submenu pages
         add_submenu_page(
-            'mpesa-payments',
+            'marupurupu-payments',
             __('Reports', 'marupurupu-checkout-for-mpesa'),
             __('Reports', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
-            'mpesa-payments',
+            'marupurupu-payments',
             array(__CLASS__, 'render_reports_page')
         );
 
         add_submenu_page(
-            'mpesa-payments',
+            'marupurupu-payments',
             __('Transactions', 'marupurupu-checkout-for-mpesa'),
             __('Transactions', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
-            'mpesa-transactions',
-            array('Mpesa_Admin_Page', 'render_page')
+            'marupurupu-transactions',
+            array('Marupurupu_Admin_Page', 'render_page')
         );
 
         add_submenu_page(
-            'mpesa-payments',
+            'marupurupu-payments',
             __('Settings', 'marupurupu-checkout-for-mpesa'),
             __('Settings', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
@@ -63,17 +63,17 @@ class Mpesa_Reports {
      * Enqueue scripts
      */
     public static function enqueue_scripts($hook) {
-        if ($hook !== 'toplevel_page_mpesa-payments') {
+        if ($hook !== 'toplevel_page_marupurupu-payments') {
             return;
         }
 
-        wp_enqueue_style('mpesa-reports', WC_MPESA_TILL_PLUGIN_URL . 'assets/css/mpesa-reports.css', array(), WC_MPESA_TILL_VERSION);
+        wp_enqueue_style('marupurupu-reports', MARUPURUPU_PLUGIN_URL . 'assets/css/mpesa-reports.css', array(), MARUPURUPU_VERSION);
 
         // Chart.js bundled locally (not loaded from a CDN) so the plugin
         // never depends on an external host being reachable/trustworthy.
         // Source: https://github.com/chartjs/Chart.js (MIT), see readme.txt.
-        wp_enqueue_script('chart-js', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/chart.umd.js', array(), '4.5.1', true);
-        wp_enqueue_script('mpesa-reports', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-reports.js', array('jquery', 'chart-js'), WC_MPESA_TILL_VERSION, true);
+        wp_enqueue_script('marupurupu-chartjs', MARUPURUPU_PLUGIN_URL . 'assets/js/chart.umd.js', array(), '4.5.1', true);
+        wp_enqueue_script('marupurupu-reports', MARUPURUPU_PLUGIN_URL . 'assets/js/mpesa-reports.js', array('jquery', 'marupurupu-chartjs'), MARUPURUPU_VERSION, true);
 
         // Chart data is computed here (not while rendering the page) so it
         // can be handed to the script through wp_localize_script(), which
@@ -83,7 +83,7 @@ class Mpesa_Reports {
         $daily_data = self::get_daily_data($date_from, $date_to);
         $status_breakdown = self::get_status_breakdown($date_from, $date_to);
 
-        wp_localize_script('mpesa-reports', 'mpesaReportsData', array(
+        wp_localize_script('marupurupu-reports', 'marupurupuReportsData', array(
             'daily' => array(
                 'labels' => array_column($daily_data, 'date'),
                 'revenue' => array_column($daily_data, 'revenue'),
@@ -151,7 +151,7 @@ class Mpesa_Reports {
             <!-- Date Range Filter -->
             <div class="mpesa-reports-filters">
                 <form method="get" action="">
-                    <input type="hidden" name="page" value="mpesa-payments">
+                    <input type="hidden" name="page" value="marupurupu-payments">
 
                     <label for="date_from"><?php esc_html_e('From:', 'marupurupu-checkout-for-mpesa'); ?></label>
                     <input type="date" name="date_from" id="date_from" value="<?php echo esc_attr($date_from); ?>">
@@ -161,7 +161,7 @@ class Mpesa_Reports {
 
                     <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
 
-                    <a href="?page=mpesa-payments" class="button"><?php esc_html_e('Reset', 'marupurupu-checkout-for-mpesa'); ?></a>
+                    <a href="?page=marupurupu-payments" class="button"><?php esc_html_e('Reset', 'marupurupu-checkout-for-mpesa'); ?></a>
 
                     <a href="<?php echo esc_url(self::get_export_url($date_from, $date_to)); ?>" class="button" style="float: right;">
                         <?php esc_html_e('Export Report (CSV)', 'marupurupu-checkout-for-mpesa'); ?>
@@ -293,7 +293,7 @@ class Mpesa_Reports {
      */
     private static function get_statistics($date_from, $date_to) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT
@@ -315,7 +315,7 @@ class Mpesa_Reports {
      */
     private static function get_daily_data($date_from, $date_to) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT
@@ -344,7 +344,7 @@ class Mpesa_Reports {
      */
     private static function get_top_customers($date_from, $date_to, $limit = 10) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_results($wpdb->prepare(
             "SELECT
@@ -368,7 +368,7 @@ class Mpesa_Reports {
      */
     private static function get_status_breakdown($date_from, $date_to) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT
@@ -386,16 +386,16 @@ class Mpesa_Reports {
      * Get export URL
      */
     private static function get_export_url($date_from, $date_to) {
-        return admin_url('admin-post.php?action=mpesa_export_report&date_from=' . urlencode($date_from) . '&date_to=' . urlencode($date_to) . '&nonce=' . wp_create_nonce('mpesa_export_report'));
+        return admin_url('admin-post.php?action=marupurupu_export_report&date_from=' . urlencode($date_from) . '&date_to=' . urlencode($date_to) . '&nonce=' . wp_create_nonce('marupurupu_export_report'));
     }
 }
 
 // Initialize
-Mpesa_Reports::init();
+Marupurupu_Reports::init();
 
 // Handle export
-add_action('admin_post_mpesa_export_report', function() {
-    check_admin_referer('mpesa_export_report', 'nonce');
+add_action('admin_post_marupurupu_export_report', function() {
+    check_admin_referer('marupurupu_export_report', 'nonce');
 
     if (!current_user_can('manage_woocommerce')) {
         wp_die(esc_html__('You do not have permission to perform this action.', 'marupurupu-checkout-for-mpesa'));
@@ -405,7 +405,7 @@ add_action('admin_post_mpesa_export_report', function() {
     $date_to = isset($_GET['date_to']) ? sanitize_text_field(wp_unslash($_GET['date_to'])) : gmdate('Y-m-d');
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+    $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
     $transactions = $wpdb->get_results($wpdb->prepare(
         "SELECT * FROM $table_name WHERE DATE(created_at) BETWEEN %s AND %s ORDER BY created_at DESC",

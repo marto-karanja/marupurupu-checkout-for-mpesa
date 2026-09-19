@@ -1,6 +1,6 @@
 <?php
 /**
- * Mpesa_Feature_Gate — the single place that decides whether a given
+ * Marupurupu_Feature_Gate — the single place that decides whether a given
  * "premium" feature is available on this install.
  *
  * ============================================================================
@@ -33,19 +33,19 @@
  * decision point so that whichever path gets chosen later, only this file
  * (or a filter added from a future Pro plugin) needs to change — nothing
  * else in the codebase should ever check `current_user_can(...)`-style
- * premium logic directly. Call `Mpesa_Feature_Gate::reports_enabled()`,
+ * premium logic directly. Call `Marupurupu_Feature_Gate::reports_enabled()`,
  * never re-implement the check.
  *
  * ============================================================================
  * THE EXTENSION CONTRACT
  * ============================================================================
  *
- * `reports_enabled()` runs its result through the `mpesa_till_reports_enabled`
+ * `reports_enabled()` runs its result through the `marupurupu_reports_enabled`
  * filter before returning it. That filter is the seam a future Pro plugin
  * would hook:
  *
- *   add_filter('mpesa_till_reports_enabled', function ($enabled) {
- *       return Mpesa_Pro_License::is_valid() || $enabled;
+ *   add_filter('marupurupu_reports_enabled', function ($enabled) {
+ *       return Marupurupu_Pro_License::is_valid() || $enabled;
  *   });
  *
  * Today the filter's default is hardcoded to `true` — every install gets
@@ -58,9 +58,9 @@
  * THE GRANDFATHER FLAG
  * ============================================================================
  *
- * `mpesa_till_legacy_full_access` (a plain WordPress option, boolean) is set
+ * `marupurupu_legacy_full_access` (a plain WordPress option, boolean) is set
  * once, automatically, the first time this version's code runs on a site —
- * see `wc_mpesa_till_check_legacy_grandfather()` in the main plugin file for
+ * see `marupurupu_check_legacy_grandfather()` in the main plugin file for
  * where it's actually determined and written. It records whether THIS site
  * already had the plugin configured before any Pro-tier gating existed in
  * the code, so that whenever gating does begin, sites that were already
@@ -82,7 +82,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Feature_Gate {
+class Marupurupu_Feature_Gate {
 
     /**
      * Whether the Reports admin page (class-mpesa-reports.php: charts,
@@ -93,7 +93,7 @@ class Mpesa_Feature_Gate {
      * duplicate the underlying logic.
      */
     public static function reports_enabled() {
-        return (bool) apply_filters('mpesa_till_reports_enabled', true);
+        return (bool) apply_filters('marupurupu_reports_enabled', true);
     }
 
     /**
@@ -104,6 +104,6 @@ class Mpesa_Feature_Gate {
      * the fact.
      */
     public static function is_legacy_grandfathered() {
-        return get_option('mpesa_till_legacy_full_access', false) === true;
+        return get_option('marupurupu_legacy_full_access', false) === true;
     }
 }

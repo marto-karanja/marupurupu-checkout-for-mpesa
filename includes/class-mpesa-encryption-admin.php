@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Encryption_Admin {
+class Marupurupu_Encryption_Admin {
 
     /**
      * Option names for one-time-dismissible notices, keyed by the short
@@ -18,8 +18,8 @@ class Mpesa_Encryption_Admin {
      * @var array
      */
     private static $dismissible_notices = array(
-        'encryption' => 'mpesa_encryption_notice_dismissed',
-        'weak_key'   => 'mpesa_weak_key_notice_dismissed',
+        'encryption' => 'marupurupu_encryption_notice_dismissed',
+        'weak_key'   => 'marupurupu_weak_key_notice_dismissed',
     );
 
     /**
@@ -50,23 +50,23 @@ class Mpesa_Encryption_Admin {
         add_action('woocommerce_settings_checkout', array(__CLASS__, 'add_connection_test_box'));
 
         // Handle migration action
-        add_action('admin_post_mpesa_migrate_credentials', array(__CLASS__, 'handle_migration'));
+        add_action('admin_post_marupurupu_migrate_credentials', array(__CLASS__, 'handle_migration'));
 
         // Add encryption test action
-        add_action('admin_post_mpesa_test_encryption', array(__CLASS__, 'handle_encryption_test'));
+        add_action('admin_post_marupurupu_test_encryption', array(__CLASS__, 'handle_encryption_test'));
 
         // Add M-Pesa connection test action
-        add_action('admin_post_mpesa_test_connection', array(__CLASS__, 'handle_test_connection'));
+        add_action('admin_post_marupurupu_test_connection', array(__CLASS__, 'handle_test_connection'));
 
         // Persist notice dismissals (shared by migration_notice and weak_key_notice)
-        add_action('wp_ajax_mpesa_dismiss_notice', array(__CLASS__, 'ajax_dismiss_notice'));
+        add_action('wp_ajax_marupurupu_dismiss_notice', array(__CLASS__, 'ajax_dismiss_notice'));
     }
 
     /**
      * AJAX handler: persist that an admin dismissed a one-time notice.
      */
     public static function ajax_dismiss_notice() {
-        check_ajax_referer('mpesa_dismiss_notice', 'nonce');
+        check_ajax_referer('marupurupu_dismiss_notice', 'nonce');
 
         if (!current_user_can('manage_woocommerce')) {
             wp_die('', '', array('response' => 403));
@@ -99,7 +99,7 @@ class Mpesa_Encryption_Admin {
         foreach ($fields_to_check as $field) {
             $value = $gateway->get_option($field);
 
-            if (!empty($value) && !Mpesa_Encryption::is_encrypted($value)) {
+            if (!empty($value) && !Marupurupu_Encryption::is_encrypted($value)) {
                 return true;
             }
         }
@@ -123,7 +123,7 @@ class Mpesa_Encryption_Admin {
         }
 
         // Don't show if user dismissed
-        if (get_option('mpesa_encryption_notice_dismissed', false)) {
+        if (get_option('marupurupu_encryption_notice_dismissed', false)) {
             return;
         }
 
@@ -134,7 +134,7 @@ class Mpesa_Encryption_Admin {
                 <?php esc_html_e('Your API credentials are currently stored unencrypted. We recommend migrating to encrypted storage for enhanced security.', 'marupurupu-checkout-for-mpesa'); ?>
             </p>
             <p>
-                <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_migrate_credentials'), 'mpesa_migrate')); ?>" class="button button-primary">
+                <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=marupurupu_migrate_credentials'), 'marupurupu_migrate')); ?>" class="button button-primary">
                     <?php esc_html_e('Migrate to Encrypted Storage', 'marupurupu-checkout-for-mpesa'); ?>
                 </a>
                 <button type="button" class="button mpesa-dismiss-notice" data-notice="encryption" data-target="mpesa-encryption-notice">
@@ -152,9 +152,9 @@ class Mpesa_Encryption_Admin {
      * once per page -- WordPress only registers a handle once.
      */
     private static function enqueue_notice_script() {
-        wp_enqueue_script('mpesa-admin-notices', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-admin-notices.js', array('jquery'), WC_MPESA_TILL_VERSION, true);
-        wp_localize_script('mpesa-admin-notices', 'mpesaAdminNotices', array(
-            'nonce' => wp_create_nonce('mpesa_dismiss_notice'),
+        wp_enqueue_script('marupurupu-admin-notices', MARUPURUPU_PLUGIN_URL . 'assets/js/mpesa-admin-notices.js', array('jquery'), MARUPURUPU_VERSION, true);
+        wp_localize_script('marupurupu-admin-notices', 'marupurupuAdminNotices', array(
+            'nonce' => wp_create_nonce('marupurupu_dismiss_notice'),
         ));
     }
 
@@ -169,11 +169,11 @@ class Mpesa_Encryption_Admin {
             return;
         }
 
-        if (!Mpesa_Encryption::is_using_weak_key()) {
+        if (!Marupurupu_Encryption::is_using_weak_key()) {
             return;
         }
 
-        if (get_option('mpesa_weak_key_notice_dismissed', false)) {
+        if (get_option('marupurupu_weak_key_notice_dismissed', false)) {
             return;
         }
 
@@ -198,7 +198,7 @@ class Mpesa_Encryption_Admin {
 
     /**
      * Display admin notices for active encryption/decryption failures.
-     * Not dismissible -- Mpesa_Encryption clears the underlying option as
+     * Not dismissible -- Marupurupu_Encryption clears the underlying option as
      * soon as an encrypt/decrypt call succeeds again, so these disappear on
      * their own once the real problem is fixed rather than being silenced
      * while still broken.
@@ -209,7 +209,7 @@ class Mpesa_Encryption_Admin {
             return;
         }
 
-        if (get_option('mpesa_till_encryption_degraded')) {
+        if (get_option('marupurupu_encryption_degraded')) {
             ?>
             <div class="notice notice-error">
                 <p>
@@ -220,7 +220,7 @@ class Mpesa_Encryption_Admin {
             <?php
         }
 
-        if (get_option('mpesa_till_decryption_key_mismatch')) {
+        if (get_option('marupurupu_decryption_key_mismatch')) {
             ?>
             <div class="notice notice-error">
                 <p>
@@ -244,7 +244,7 @@ class Mpesa_Encryption_Admin {
      * and forget mid-task that checkout is unconfigured until they do.
      */
     public static function credentials_reset_notice() {
-        if (!get_option('mpesa_till_credentials_cleared_for_encryption_upgrade')) {
+        if (!get_option('marupurupu_credentials_cleared_notice')) {
             return;
         }
 
@@ -291,7 +291,7 @@ class Mpesa_Encryption_Admin {
 
         // Check encryption status
         $all_encrypted = !self::needs_migration();
-        $encryption_working = Mpesa_Encryption::test_encryption();
+        $encryption_working = Marupurupu_Encryption::test_encryption();
         $openssl_available = function_exists('openssl_encrypt');
 
         ?>
@@ -331,7 +331,7 @@ class Mpesa_Encryption_Admin {
                             <?php else: ?>
                                 <span style="color: #ffb900;">⚠ <?php esc_html_e('Some credentials unencrypted', 'marupurupu-checkout-for-mpesa'); ?></span>
                                 <p style="margin: 5px 0 0 0;">
-                                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_migrate_credentials'), 'mpesa_migrate')); ?>" class="button button-small">
+                                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=marupurupu_migrate_credentials'), 'marupurupu_migrate')); ?>" class="button button-small">
                                         <?php esc_html_e('Migrate Now', 'marupurupu-checkout-for-mpesa'); ?>
                                     </a>
                                 </p>
@@ -420,7 +420,7 @@ class Mpesa_Encryption_Admin {
                 <?php if (empty($gateway->consumer_key) || empty($gateway->consumer_secret)): ?>
                     <em><?php esc_html_e('No Consumer Key/Secret saved for the current mode yet -- save your settings first.', 'marupurupu-checkout-for-mpesa'); ?></em>
                 <?php else: ?>
-                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_test_connection'), 'mpesa_test_connection')); ?>" class="button button-primary">
+                    <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=marupurupu_test_connection'), 'marupurupu_test_connection')); ?>" class="button button-primary">
                         <?php esc_html_e('Test Connection Now', 'marupurupu-checkout-for-mpesa'); ?>
                     </a>
                 <?php endif; ?>
@@ -433,11 +433,11 @@ class Mpesa_Encryption_Admin {
      * Handle the "Test Connection" action: attempt a real OAuth token
      * request with the currently saved credentials and redirect back with
      * a plain-language result. Never passes the credentials themselves
-     * through the URL or the resulting notice -- only Mpesa_API::test_connection()'s
+     * through the URL or the resulting notice -- only Marupurupu_API::test_connection()'s
      * already-scrubbed message.
      */
     public static function handle_test_connection() {
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_test_connection')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'marupurupu_test_connection')) {
             wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
@@ -452,7 +452,7 @@ class Mpesa_Encryption_Admin {
         );
 
         if ($gateway) {
-            $api = new Mpesa_API(
+            $api = new Marupurupu_API(
                 $gateway->consumer_key,
                 $gateway->consumer_secret,
                 $gateway->shortcode,
@@ -469,8 +469,8 @@ class Mpesa_Encryption_Admin {
                 'page' => 'wc-settings',
                 'tab' => 'checkout',
                 'section' => 'mpesa_till',
-                'mpesa_connection_test' => $result['success'] ? 'success' : 'failed',
-                'mpesa_connection_message' => rawurlencode($result['message']),
+                'marupurupu_connection_test' => $result['success'] ? 'success' : 'failed',
+                'marupurupu_connection_message' => rawurlencode($result['message']),
             ),
             admin_url('admin.php')
         );
@@ -484,7 +484,7 @@ class Mpesa_Encryption_Admin {
      */
     public static function handle_migration() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_migrate')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'marupurupu_migrate')) {
             wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
@@ -494,7 +494,7 @@ class Mpesa_Encryption_Admin {
         }
 
         // Perform migration
-        $result = Mpesa_Encryption::migrate_credentials();
+        $result = Marupurupu_Encryption::migrate_credentials();
 
         // Redirect back with message
         $redirect_url = add_query_arg(
@@ -502,8 +502,8 @@ class Mpesa_Encryption_Admin {
                 'page' => 'wc-settings',
                 'tab' => 'checkout',
                 'section' => 'mpesa_till',
-                'mpesa_migration' => $result['success'] ? 'success' : 'failed',
-                'mpesa_migrated_count' => $result['migrated']
+                'marupurupu_migration' => $result['success'] ? 'success' : 'failed',
+                'marupurupu_migrated_count' => $result['migrated']
             ),
             admin_url('admin.php')
         );
@@ -517,7 +517,7 @@ class Mpesa_Encryption_Admin {
      */
     public static function handle_encryption_test() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_test_encryption')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'marupurupu_test_encryption')) {
             wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
@@ -527,7 +527,7 @@ class Mpesa_Encryption_Admin {
         }
 
         // Run test
-        $success = Mpesa_Encryption::test_encryption();
+        $success = Marupurupu_Encryption::test_encryption();
 
         // Redirect back with message
         $redirect_url = add_query_arg(
@@ -535,7 +535,7 @@ class Mpesa_Encryption_Admin {
                 'page' => 'wc-settings',
                 'tab' => 'checkout',
                 'section' => 'mpesa_till',
-                'mpesa_encryption_test' => $success ? 'passed' : 'failed'
+                'marupurupu_encryption_test' => $success ? 'passed' : 'failed'
             ),
             admin_url('admin.php')
         );
@@ -547,7 +547,7 @@ class Mpesa_Encryption_Admin {
     /**
      * Get M-Pesa gateway instance
      *
-     * @return WC_Mpesa_Till_Gateway|null
+     * @return Marupurupu_Gateway|null
      */
     private static function get_gateway() {
         if (!function_exists('WC')) {
@@ -562,14 +562,14 @@ class Mpesa_Encryption_Admin {
      * Display migration success/failure messages
      */
     public static function display_migration_messages() {
-        if (!isset($_GET['mpesa_migration'])) {
+        if (!isset($_GET['marupurupu_migration'])) {
             return;
         }
 
-        $migration_result = sanitize_text_field(wp_unslash($_GET['mpesa_migration']));
+        $migration_result = sanitize_text_field(wp_unslash($_GET['marupurupu_migration']));
 
         if ($migration_result === 'success') {
-            $count = isset($_GET['mpesa_migrated_count']) ? intval($_GET['mpesa_migrated_count']) : 0;
+            $count = isset($_GET['marupurupu_migrated_count']) ? intval($_GET['marupurupu_migrated_count']) : 0;
             ?>
             <div class="notice notice-success is-dismissible">
                 <p>
@@ -597,11 +597,11 @@ class Mpesa_Encryption_Admin {
      * Display encryption test messages
      */
     public static function display_test_messages() {
-        if (!isset($_GET['mpesa_encryption_test'])) {
+        if (!isset($_GET['marupurupu_encryption_test'])) {
             return;
         }
 
-        $test_result = sanitize_text_field(wp_unslash($_GET['mpesa_encryption_test']));
+        $test_result = sanitize_text_field(wp_unslash($_GET['marupurupu_encryption_test']));
 
         if ($test_result === 'passed') {
             ?>
@@ -626,22 +626,22 @@ class Mpesa_Encryption_Admin {
 
     /**
      * Display M-Pesa connection test result. Message text comes from
-     * Mpesa_API::test_connection(), which never includes credentials or
+     * Marupurupu_API::test_connection(), which never includes credentials or
      * Safaricom's raw response body -- safe to esc_html() and print as-is.
      */
     public static function display_connection_test_messages() {
-        if (!isset($_GET['mpesa_connection_test'])) {
+        if (!isset($_GET['marupurupu_connection_test'])) {
             return;
         }
 
-        $passed = sanitize_text_field(wp_unslash($_GET['mpesa_connection_test'])) === 'success';
+        $passed = sanitize_text_field(wp_unslash($_GET['marupurupu_connection_test'])) === 'success';
         // Note: no rawurldecode() here -- add_query_arg() doesn't re-encode
         // values passed to it (only pre-existing query args get
         // urlencode_deep()'d), so the rawurlencode() applied when building
         // this URL in handle_test_connection() is the only encoding layer;
         // PHP's own query-string parsing already undoes it once into $_GET.
-        $message = isset($_GET['mpesa_connection_message'])
-            ? sanitize_text_field(wp_unslash($_GET['mpesa_connection_message']))
+        $message = isset($_GET['marupurupu_connection_message'])
+            ? sanitize_text_field(wp_unslash($_GET['marupurupu_connection_message']))
             : '';
 
         $notice_class = $passed ? 'notice-success' : 'notice-error';
@@ -658,9 +658,9 @@ class Mpesa_Encryption_Admin {
 }
 
 // Initialize admin notices
-add_action('admin_notices', array('Mpesa_Encryption_Admin', 'display_migration_messages'));
-add_action('admin_notices', array('Mpesa_Encryption_Admin', 'display_test_messages'));
-add_action('admin_notices', array('Mpesa_Encryption_Admin', 'display_connection_test_messages'));
+add_action('admin_notices', array('Marupurupu_Encryption_Admin', 'display_migration_messages'));
+add_action('admin_notices', array('Marupurupu_Encryption_Admin', 'display_test_messages'));
+add_action('admin_notices', array('Marupurupu_Encryption_Admin', 'display_connection_test_messages'));
 
 // Initialize admin utilities
-Mpesa_Encryption_Admin::init();
+Marupurupu_Encryption_Admin::init();

@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Admin_Page {
+class Marupurupu_Admin_Page {
 
     /**
      * Initialize admin page
@@ -31,7 +31,7 @@ class Mpesa_Admin_Page {
             __('M-Pesa Transactions', 'marupurupu-checkout-for-mpesa'),
             __('M-Pesa Transactions', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
-            'mpesa-transactions',
+            'marupurupu-transactions',
             array(__CLASS__, 'render_page')
         );
     }
@@ -41,13 +41,13 @@ class Mpesa_Admin_Page {
      */
     public static function enqueue_styles($hook) {
         // This page is registered under both the WooCommerce menu and the
-        // M-Pesa Payments menu (see Mpesa_Reports::add_menu_page()), so its
+        // M-Pesa Payments menu (see Marupurupu_Reports::add_menu_page()), so its
         // hook suffix differs depending on which menu it was opened from.
-        if (false === strpos($hook, '_page_mpesa-transactions')) {
+        if (false === strpos($hook, '_page_marupurupu-transactions')) {
             return;
         }
 
-        wp_enqueue_style('mpesa-admin', WC_MPESA_TILL_PLUGIN_URL . 'assets/css/admin.css', array(), WC_MPESA_TILL_VERSION);
+        wp_enqueue_style('marupurupu-admin', MARUPURUPU_PLUGIN_URL . 'assets/css/admin.css', array(), MARUPURUPU_VERSION);
     }
 
     /**
@@ -55,7 +55,7 @@ class Mpesa_Admin_Page {
      */
     public static function render_page() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         // (Bulk actions are handled earlier, on admin_init -- see init().)
 
@@ -131,7 +131,7 @@ class Mpesa_Admin_Page {
 
             <!-- Filters -->
             <form method="get" action="">
-                <input type="hidden" name="page" value="mpesa-transactions">
+                <input type="hidden" name="page" value="marupurupu-transactions">
                 <div class="tablenav top">
                     <div class="alignleft actions">
                         <select name="status">
@@ -146,7 +146,7 @@ class Mpesa_Admin_Page {
                         <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_html_e('Search by order ID, receipt, or phone...', 'marupurupu-checkout-for-mpesa'); ?>">
                         <input type="submit" class="button" value="<?php esc_html_e('Search', 'marupurupu-checkout-for-mpesa'); ?>">
                         <?php if ($search || $status_filter): ?>
-                            <a href="?page=mpesa-transactions" class="button"><?php esc_html_e('Clear', 'marupurupu-checkout-for-mpesa'); ?></a>
+                            <a href="?page=marupurupu-transactions" class="button"><?php esc_html_e('Clear', 'marupurupu-checkout-for-mpesa'); ?></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ class Mpesa_Admin_Page {
 
             <!-- Transactions Table -->
             <form method="post">
-                <?php wp_nonce_field('mpesa_bulk_action', 'mpesa_bulk_nonce'); ?>
+                <?php wp_nonce_field('marupurupu_bulk_action', 'marupurupu_bulk_nonce'); ?>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
                         <tr>
@@ -275,12 +275,12 @@ class Mpesa_Admin_Page {
      * Handle bulk actions
      */
     public static function handle_bulk_actions() {
-        if (!isset($_POST['bulk_action'], $_POST['transaction_ids'], $_POST['mpesa_bulk_nonce'])) {
+        if (!isset($_POST['bulk_action'], $_POST['transaction_ids'], $_POST['marupurupu_bulk_nonce'])) {
             return;
         }
 
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mpesa_bulk_nonce'])), 'mpesa_bulk_action')) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['marupurupu_bulk_nonce'])), 'marupurupu_bulk_action')) {
             wp_die(esc_html__('Security check failed.', 'marupurupu-checkout-for-mpesa'));
         }
 
@@ -302,7 +302,7 @@ class Mpesa_Admin_Page {
      */
     public static function export_to_csv($transaction_ids = array()) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         if (empty($transaction_ids)) {
             return;
@@ -367,4 +367,4 @@ class Mpesa_Admin_Page {
 }
 
 // Initialize admin page
-Mpesa_Admin_Page::init();
+Marupurupu_Admin_Page::init();

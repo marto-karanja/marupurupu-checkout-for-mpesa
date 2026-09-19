@@ -7,11 +7,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Callback {
+class Marupurupu_Callback {
 
     /**
      * Secret token expected on incoming callback requests (as a ?key=
-     * query arg). Generated per-site by WC_Mpesa_Till_Gateway and embedded
+     * query arg). Generated per-site by Marupurupu_Gateway and embedded
      * in the callback URL handed to Safaricom.
      *
      * @var string
@@ -36,7 +36,7 @@ class Mpesa_Callback {
         }
 
         // Get the callback data
-        $callback_json = file_get_contents('php://input');
+        $callback_json = $this->read_request_body();
         $callback_data = json_decode($callback_json, true);
 
         if (!is_array($callback_data)) {
@@ -85,6 +85,16 @@ class Mpesa_Callback {
     }
 
     /**
+     * Raw request body. A separate method so tests can supply a payload
+     * without a real HTTP request (php://input can't be faked).
+     *
+     * @return string
+     */
+    protected function read_request_body() {
+        return (string) file_get_contents('php://input');
+    }
+
+    /**
      * @return string
      */
     private function get_remote_ip() {
@@ -103,7 +113,7 @@ class Mpesa_Callback {
         $result_desc = isset($stk_callback['ResultDesc']) ? $stk_callback['ResultDesc'] : '';
 
         // Get transaction from database
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
         $transaction = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE checkout_request_id = %s",
             $checkout_request_id
@@ -291,7 +301,7 @@ class Mpesa_Callback {
     /**
      * Send response back to M-Pesa
      */
-    private function send_response($response) {
+    protected function send_response($response) {
         header('Content-Type: application/json');
         echo wp_json_encode($response);
         exit;

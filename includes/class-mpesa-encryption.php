@@ -44,9 +44,9 @@
  * No effort was made to keep this compatible with data encrypted by the
  * previous CBC-based version (explicit product decision -- see
  * PROGRESS.md's 2026-08-25 entry for why). Any credential encrypted under
- * the old scheme will no longer decrypt correctly. `wc_mpesa_till_
- * reset_credentials_for_encryption_upgrade()` in the main plugin file
- * handles this transition explicitly and safely: rather than risk
+ * the old scheme will no longer decrypt correctly. A one-time reset routine
+ * in the main plugin file (since removed -- every known install had already
+ * been through it) handled that transition explicitly and safely: rather than risk
  * silently double-encrypting old ciphertext (which would corrupt it and
  * could send garbled credentials to Safaricom's live API without any
  * visible error), it deliberately clears the encrypted credential fields
@@ -60,7 +60,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Encryption {
+class Marupurupu_Encryption {
 
     /**
      * Encryption method. GCM is an AEAD (authenticated encryption with
@@ -83,13 +83,19 @@ class Mpesa_Encryption {
      * format change would signal "don't treat v1 data as valid" without
      * re-introducing the ambiguity this rewrite removed.
      */
+    // STORED-DATA FORMAT -- DO NOT RENAME. This marker is written at the start of
+    // every saved credential; changing it makes all stored credentials
+    // unrecognised. (The same applies to the HKDF label 'mpesa_till_credential_encryption'
+    // and the fallback label 'mpesa_encryption_fallback' below: they are inputs to
+    // the encryption key, not namespace prefixes.) The plugin-wide rename to
+    // marupurupu_* deliberately left these alone.
     const PREFIX = 'mpesa_enc_v1:';
 
     /**
      * Whether the encryption key falls back to a value derivable by anyone
      * who knows the site's URL (i.e. AUTH_KEY/AUTH_SALT are unset or left
      * at their WordPress placeholder). Used both to pick the key and to
-     * surface an admin warning -- see Mpesa_Encryption_Admin.
+     * surface an admin warning -- see Marupurupu_Encryption_Admin.
      *
      * @return bool
      */
@@ -148,7 +154,7 @@ class Mpesa_Encryption {
 
         if (!function_exists('openssl_encrypt')) {
             error_log('M-Pesa Encryption Error: OpenSSL extension not available. Refusing to store credential unencrypted.');
-            update_option('mpesa_till_encryption_degraded', true);
+            update_option('marupurupu_encryption_degraded', true);
             // Unlike the previous version, do NOT fall back to storing the
             // plaintext -- silently persisting an unencrypted credential is
             // worse than a clear failure. Callers must treat '' as
@@ -175,17 +181,17 @@ class Mpesa_Encryption {
 
             if ($encrypted === false) {
                 error_log('M-Pesa Encryption Error: Failed to encrypt data');
-                update_option('mpesa_till_encryption_degraded', true);
+                update_option('marupurupu_encryption_degraded', true);
                 return '';
             }
 
-            delete_option('mpesa_till_encryption_degraded');
+            delete_option('marupurupu_encryption_degraded');
 
             return self::PREFIX . base64_encode($iv . $tag . $encrypted);
 
         } catch (Exception $e) {
             error_log('M-Pesa Encryption Exception: ' . $e->getMessage());
-            update_option('mpesa_till_encryption_degraded', true);
+            update_option('marupurupu_encryption_degraded', true);
             return '';
         }
     }
@@ -197,8 +203,8 @@ class Mpesa_Encryption {
      * decryption/authentication fails (wrong key, corrupted/tampered
      * data), this returns '' rather than the still-encrypted bytes --
      * using ciphertext as if it were a real credential would send garbage
-     * to Safaricom's API with no visible error. mpesa_till_decryption_key_mismatch
-     * is set so Mpesa_Encryption_Admin can surface a clear notice instead.
+     * to Safaricom's API with no visible error. marupurupu_decryption_key_mismatch
+     * is set so Marupurupu_Encryption_Admin can surface a clear notice instead.
      *
      * @param string $data Value as stored (may or may not be encrypted).
      * @return string Decrypted plaintext, the original value if it was
@@ -230,7 +236,7 @@ class Mpesa_Encryption {
 
             if ($decoded === false || strlen($decoded) < $min_length) {
                 error_log('M-Pesa Encryption Error: Encrypted value is malformed (wrong length/encoding).');
-                update_option('mpesa_till_decryption_key_mismatch', true);
+                update_option('marupurupu_decryption_key_mismatch', true);
                 return '';
             }
 
@@ -251,17 +257,17 @@ class Mpesa_Encryption {
                 // GCM tag verification failed -- this is now a genuine
                 // signal (wrong key or corrupted data), not a guess.
                 error_log('M-Pesa Encryption Error: Failed to decrypt/authenticate stored credential. Encryption key may have changed, or the stored value was corrupted.');
-                update_option('mpesa_till_decryption_key_mismatch', true);
+                update_option('marupurupu_decryption_key_mismatch', true);
                 return '';
             }
 
-            delete_option('mpesa_till_decryption_key_mismatch');
+            delete_option('marupurupu_decryption_key_mismatch');
 
             return $decrypted;
 
         } catch (Exception $e) {
             error_log('M-Pesa Encryption Exception: ' . $e->getMessage());
-            update_option('mpesa_till_decryption_key_mismatch', true);
+            update_option('marupurupu_decryption_key_mismatch', true);
             return '';
         }
     }

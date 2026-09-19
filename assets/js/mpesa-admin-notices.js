@@ -1,9 +1,9 @@
 /**
  * Admin notices: persist a "Dismiss" click.
  *
- * Enqueued by Mpesa_Encryption_Admin when one of its dismissible notices is
+ * Enqueued by Marupurupu_Encryption_Admin when one of its dismissible notices is
  * shown. The nonce is passed in via wp_localize_script() as
- * `mpesaAdminNotices`.
+ * `marupurupuAdminNotices`.
  */
 jQuery(function ($) {
     'use strict';
@@ -12,9 +12,9 @@ jQuery(function ($) {
         var $button = $(this);
 
         $.post(ajaxurl, {
-            action: 'mpesa_dismiss_notice',
+            action: 'marupurupu_dismiss_notice',
             notice: $button.data('notice'),
-            nonce: mpesaAdminNotices.nonce
+            nonce: marupurupuAdminNotices.nonce
         });
 
         $('#' + $button.data('target')).fadeOut();

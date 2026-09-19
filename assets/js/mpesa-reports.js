@@ -2,17 +2,17 @@
  * M-Pesa Reports page charts.
  *
  * Chart data and translated labels are passed in by
- * Mpesa_Reports::enqueue_scripts() via wp_localize_script() as
- * `mpesaReportsData` (JSON-encoded by WordPress, not echoed by hand).
+ * Marupurupu_Reports::enqueue_scripts() via wp_localize_script() as
+ * `marupurupuReportsData` (JSON-encoded by WordPress, not echoed by hand).
  */
 jQuery(function () {
     'use strict';
 
-    if (typeof Chart === 'undefined' || typeof mpesaReportsData === 'undefined') {
+    if (typeof Chart === 'undefined' || typeof marupurupuReportsData === 'undefined') {
         return;
     }
 
-    var data = mpesaReportsData;
+    var data = marupurupuReportsData;
     var i18n = data.i18n;
 
     var revenueEl = document.getElementById('revenueChart');

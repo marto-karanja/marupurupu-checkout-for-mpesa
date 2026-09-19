@@ -2,7 +2,7 @@
  * Settings page: "Change" button on a saved (masked) credential field.
  *
  * Swaps the read-only masked display for an empty, real input. Enqueued by
- * WC_Mpesa_Till_Gateway::render_masked_credential_control().
+ * Marupurupu_Gateway::render_masked_credential_control().
  */
 (function () {
     'use strict';

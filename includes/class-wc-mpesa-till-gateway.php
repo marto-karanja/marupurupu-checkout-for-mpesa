@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
+class Marupurupu_Gateway extends WC_Payment_Gateway {
 
     /**
      * Single source of truth for which settings fields hold encrypted
@@ -25,7 +25,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      * get_option()/get_decrypted_option(). Declared explicitly (rather than
      * left as dynamic properties) since PHP 8.2 deprecates dynamic property
      * creation, and since several of these are also read from outside this
-     * class (Mpesa_Ajax, Mpesa_Helpers, Mpesa_Encryption_Admin) -- hence
+     * class (Marupurupu_Ajax, Marupurupu_Helpers, Marupurupu_Encryption_Admin) -- hence
      * public, not private.
      */
     public $testmode;
@@ -61,7 +61,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
 
         // The callback URL embeds a per-site secret token (auto-generated
         // and persisted on first use) so the webhook can reject requests
-        // that don't know it. See handle_callback() / Mpesa_Callback.
+        // that don't know it. See handle_callback() / Marupurupu_Callback.
         $this->callback_secret = $this->get_callback_secret();
         $this->callback_url = $this->build_callback_url();
 
@@ -220,6 +220,18 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
     }
 
     /**
+     * Whether $phone is a valid M-Pesa number in the format Daraja expects:
+     * country code 254 followed by nine digits, no spaces, no leading "+" or 0.
+     *
+     * @param mixed $phone
+     * @return bool
+     */
+    public static function is_valid_phone_number($phone) {
+        // \z (not $): a plain $ also matches just before a trailing newline.
+        return is_string($phone) && 1 === preg_match('/^254[0-9]{9}\z/', $phone);
+    }
+
+    /**
      * Validate payment fields
      */
     public function validate_fields() {
@@ -230,7 +242,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
 
         $phone = sanitize_text_field(wp_unslash($_POST['mpesa_phone_number']));
 
-        if (!preg_match('/^254[0-9]{9}$/', $phone)) {
+        if (!self::is_valid_phone_number($phone)) {
             wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'marupurupu-checkout-for-mpesa'), 'error');
             return false;
         }
@@ -249,8 +261,20 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         // guarantee, not a new validation path.
         $phone = isset($_POST['mpesa_phone_number']) ? sanitize_text_field(wp_unslash($_POST['mpesa_phone_number'])) : '';
 
+        // Validate again here, as defence in depth: whether WooCommerce's block
+        // checkout (Store API) runs validate_fields() has varied between
+        // WooCommerce versions, and a bad number must never reach Safaricom.
+        if (!self::is_valid_phone_number($phone)) {
+            wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'marupurupu-checkout-for-mpesa'), 'error');
+
+            return array(
+                'result' => 'fail',
+                'redirect' => ''
+            );
+        }
+
         // Initialize M-Pesa API
-        $mpesa_api = new Mpesa_API(
+        $marupurupu_api = new Marupurupu_API(
             $this->consumer_key,
             $this->consumer_secret,
             $this->shortcode,
@@ -260,7 +284,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         );
 
         // Initiate STK Push
-        $response = $mpesa_api->stk_push(
+        $response = $marupurupu_api->stk_push(
             $phone,
             $order->get_total(),
             $order_id,
@@ -330,7 +354,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     private function save_transaction($order_id, $phone, $amount, $response) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         $wpdb->insert(
             $table_name,
@@ -362,7 +386,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         }
 
         // Decrypt using encryption class
-        return Mpesa_Encryption::decrypt($value);
+        return Marupurupu_Encryption::decrypt($value);
     }
 
     /**
@@ -402,11 +426,11 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             // A resubmitted already-encrypted value (shouldn't normally
             // happen now that forms never redisplay secrets, but harmless
             // to guard against) is left as-is rather than double-encrypted.
-            if (Mpesa_Encryption::is_encrypted($submitted)) {
+            if (Marupurupu_Encryption::is_encrypted($submitted)) {
                 continue;
             }
 
-            $encrypted_value = Mpesa_Encryption::encrypt($submitted);
+            $encrypted_value = Marupurupu_Encryption::encrypt($submitted);
 
             if ($encrypted_value === '') {
                 // Encryption failed (e.g. OpenSSL unavailable). Do NOT save
@@ -433,7 +457,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             // A credential was just freshly encrypted and saved -- if this
             // site had its credentials cleared by the 2026-08-25 encryption
             // upgrade, that's now resolved; stop showing the notice about it.
-            delete_option('mpesa_till_credentials_cleared_for_encryption_upgrade');
+            delete_option('marupurupu_credentials_cleared_notice');
         }
 
         return parent::process_admin_options();
@@ -515,7 +539,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
     private function render_masked_credential_control($field_key, $data, $decrypted) {
         $masked = $this->mask_credential_for_display($decrypted);
 
-        wp_enqueue_script('mpesa-admin-credentials', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-admin-credentials.js', array(), WC_MPESA_TILL_VERSION, true);
+        wp_enqueue_script('marupurupu-admin-credentials', MARUPURUPU_PLUGIN_URL . 'assets/js/mpesa-admin-credentials.js', array(), MARUPURUPU_VERSION, true);
         ?>
         <span id="<?php echo esc_attr($field_key); ?>_masked" style="font-family: monospace; letter-spacing: 2px; display: inline-block; padding: 0 4px;"><?php echo esc_html($masked); ?></span>
         <button type="button" id="<?php echo esc_attr($field_key); ?>_change" class="button button-small mpesa-credential-change" data-field="<?php echo esc_attr($field_key); ?>"><?php esc_html_e('Change', 'marupurupu-checkout-for-mpesa'); ?></button>
@@ -556,7 +580,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             $data['description'] = $this->credential_field_description($data['description'], $has_saved_value);
 
             if ($has_saved_value) {
-                $decrypted_for_mask = Mpesa_Encryption::decrypt($value);
+                $decrypted_for_mask = Marupurupu_Encryption::decrypt($value);
             }
 
             $value = '';
@@ -628,7 +652,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             $data['description'] = $this->credential_field_description($data['description'], $has_saved_value);
 
             if ($has_saved_value) {
-                $decrypted_for_mask = Mpesa_Encryption::decrypt($value);
+                $decrypted_for_mask = Marupurupu_Encryption::decrypt($value);
             }
 
             $value = '';
@@ -660,7 +684,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      * Handle callback from M-Pesa
      */
     public function handle_callback() {
-        $callback_handler = new Mpesa_Callback($this->callback_secret);
+        $callback_handler = new Marupurupu_Callback($this->callback_secret);
         $callback_handler->process_callback();
     }
 }

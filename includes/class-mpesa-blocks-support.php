@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
 /**
  * M-Pesa Till Payment Blocks Integration
  */
-final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
+final class Marupurupu_Blocks_Support extends AbstractPaymentMethodType {
 
     /**
      * Payment method name/id
@@ -27,7 +27,7 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
     /**
      * Gateway instance
      *
-     * @var WC_Mpesa_Till_Gateway
+     * @var Marupurupu_Gateway
      */
     private $gateway;
 
@@ -63,7 +63,7 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
      */
     public function get_payment_method_script_handles() {
         $script_path = '/assets/js/mpesa-blocks.js';
-        $script_asset_path = WC_MPESA_TILL_PLUGIN_DIR . 'assets/js/mpesa-blocks.asset.php';
+        $script_asset_path = MARUPURUPU_PLUGIN_DIR . 'assets/js/mpesa-blocks.asset.php';
 
         $script_asset = file_exists($script_asset_path)
             ? require($script_asset_path)
@@ -75,12 +75,12 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
                     'wp-html-entities',
                     'wp-i18n',
                 ],
-                'version' => WC_MPESA_TILL_VERSION,
+                'version' => MARUPURUPU_VERSION,
             ];
 
         wp_register_script(
-            'wc-mpesa-till-blocks',
-            WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-blocks.js',
+            'marupurupu-blocks',
+            MARUPURUPU_PLUGIN_URL . 'assets/js/mpesa-blocks.js',
             $script_asset['dependencies'],
             $script_asset['version'],
             true
@@ -88,23 +88,23 @@ final class WC_Mpesa_Till_Blocks_Support extends AbstractPaymentMethodType {
 
         if (function_exists('wp_set_script_translations')) {
             wp_set_script_translations(
-                'wc-mpesa-till-blocks',
+                'marupurupu-blocks',
                 'marupurupu-checkout-for-mpesa',
-                WC_MPESA_TILL_PLUGIN_DIR . 'languages'
+                MARUPURUPU_PLUGIN_DIR . 'languages'
             );
         }
 
         // Localize script with dynamic data
         wp_localize_script(
-            'wc-mpesa-till-blocks',
-            'wcMpesaTillData',
+            'marupurupu-blocks',
+            'marupurupuBlocksData',
             [
                 'title' => $this->gateway ? $this->gateway->title : __('M-Pesa', 'marupurupu-checkout-for-mpesa'),
                 'description' => $this->gateway ? $this->gateway->description : '',
             ]
         );
 
-        return ['wc-mpesa-till-blocks'];
+        return ['marupurupu-blocks'];
     }
 
     /**

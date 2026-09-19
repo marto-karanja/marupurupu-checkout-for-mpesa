@@ -4,7 +4,7 @@ Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.6
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,9 +71,9 @@ This plugin connects to the third-party services below. Nothing is sent to Safar
 **Safaricom Daraja API** (`api.safaricom.co.ke`, or `sandbox.safaricom.co.ke` when Test Mode is on) — the service that actually takes the M-Pesa payment.
 * Used for: requesting an access token, sending an STK Push payment prompt to the customer's phone, and checking the status of a payment. Safaricom also posts the payment result back to your site's callback URL.
 * Sent, and when: your Consumer Key and Consumer Secret (to obtain a token — whenever one is needed and when you click "Test M-Pesa Connection"); and, when a customer pays, your Business Short Code and Till Number, a request password derived from your Passkey, the order amount, the customer's M-Pesa phone number, an order reference ("Order-" plus the order number) and your site's callback URL.
-* Provider: Safaricom PLC. Daraja developer portal: https://developer.safaricom.co.ke/ (its Terms and Conditions and Privacy Policy are linked from the portal footer). Safaricom terms: https://safaricom.co.ke/about/media-center/publications/terms-and-conditions
+* Provider: Safaricom PLC. Daraja developer portal: https://developer.safaricom.co.ke/ — Terms and Conditions and Privacy Policy: https://developer.safaricom.co.ke/terms
 
-**Plugin usage-statistics collector** (`telemetry.billtoolbox.com`) — optional and off by default; used only if you tick "Help improve this plugin by sharing anonymous usage data" in the gateway settings. Exactly what is sent, and when, is listed field by field under "Privacy Policy" below. Operated by the plugin author (https://billtoolbox.com). Terms: https://billtoolbox.com/terms/ — Privacy Policy: https://billtoolbox.com/privacy-policy/
+**Plugin usage-statistics collector** (`telemetry.billtoolbox.com`) — optional and off by default; used only if you tick "Help improve this plugin by sharing anonymous usage data" in the gateway settings. Exactly what is sent, and when, is listed field by field under "Privacy Policy" below. Operated by the plugin author. It has no separate terms document: the complete disclosure of what it receives, stores and for how long is the "Privacy Policy" section below.
 
 **WordPress.org secret-key generator** (`api.wordpress.org/secret-key/1.1/salt/`) — only a link in an admin notice shown when your site's security keys are missing. The plugin sends nothing to it; your browser opens it only if you click the link.
 
@@ -154,6 +154,14 @@ The plugin automatically generates a callback URL, including a secret token uniq
 6. Payment settings and encryption management
 
 == Changelog ==
+
+= 1.6.0 - 2026-09-19 =
+* Changed: **Unique naming prefix.** Every class, function, constant, option, transient, scheduled event, hook, AJAX action, script handle and admin menu slug the plugin registers now uses the prefix `marupurupu_` / `Marupurupu_` / `MARUPURUPU_` instead of the generic `mpesa` (which could collide with other M-Pesa plugins). The custom transactions table is now `{prefix}marupurupu_transactions`.
+* Added: **Automatic one-time data migration.** On the first request after updating, data stored under the old names is moved across: the transactions table is renamed (a single atomic `RENAME TABLE`; no rows are copied or lost), saved options and dismissed notices are carried over, and leftover scheduled events are cleared. Your gateway settings, saved credentials and payment history are unchanged, and no action is needed. The migration retries by itself if it cannot finish, and never overwrites newer data.
+* Unchanged on purpose: the payment method id (`mpesa_till`), your saved gateway settings, and the Safaricom callback URL (`/wc-api/wc_mpesa_till_callback/`) — orders, settings and Safaricom callbacks depend on them.
+* Added: The phone number is now also validated again on the server at the start of payment processing, before any request is made to Safaricom (whether WooCommerce's block checkout runs the classic field validation has varied between WooCommerce versions, so this makes the check independent of it). A trailing newline is no longer accepted as part of a phone number.
+* Removed: The one-time credential-reset routine from the 2026-08 encryption upgrade (every existing install has already been through it; it could only ever cause harm on a fresh one).
+* Added: A unit-test suite (`composer test`) covering credential encryption, the payment webhook, the STK Push request, the migration and the order-state guard.
 
 = 1.5.6 - 2026-09-19 =
 * Fixed: **Block-based checkout could not collect a phone number.** The block checkout component only displayed the payment description; the phone-number field, its validation and the code that submits it with the order had been lost in an earlier source-tree consolidation, so paying with M-Pesa on the WooCommerce Cart & Checkout blocks could not work. Restored. Classic checkout was never affected.
@@ -349,6 +357,15 @@ Passkey, callback secret) in any form.
 Telemetry, when enabled, is sent to a dedicated collector endpoint operated
 by the plugin author (`telemetry.billtoolbox.com`) — a separate WordPress
 install used only for this purpose, isolated from any other site.
+
+**Also recorded by the collector**: like any web server, it receives the IP
+address of the server that sends each event, and stores it with the event. It
+is used only for rate limiting and abuse investigation and is not shown on the
+collector's dashboard. Events (including that IP address) are currently kept
+until they are deleted manually — there is no automatic expiry. To have the
+events for your site removed, ask in this plugin's support forum on
+WordPress.org and include your site's identifier (`site_id`: the SHA-256 hash
+of your site URL described above).
 
 == Credits ==
 

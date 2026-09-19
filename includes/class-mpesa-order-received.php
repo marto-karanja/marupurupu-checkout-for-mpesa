@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Order_Received {
+class Marupurupu_Order_Received {
 
     /**
      * Initialize
@@ -40,29 +40,29 @@ class Mpesa_Order_Received {
 
         // Enqueue CSS
         wp_enqueue_style(
-            'mpesa-order-status',
-            WC_MPESA_TILL_PLUGIN_URL . 'assets/css/mpesa-order-status.css',
+            'marupurupu-order-status',
+            MARUPURUPU_PLUGIN_URL . 'assets/css/mpesa-order-status.css',
             array(),
-            WC_MPESA_TILL_VERSION
+            MARUPURUPU_VERSION
         );
 
         // Enqueue JS
         wp_enqueue_script(
-            'mpesa-order-status',
-            WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-order-status.js',
+            'marupurupu-order-status',
+            MARUPURUPU_PLUGIN_URL . 'assets/js/mpesa-order-status.js',
             array('jquery'),
-            WC_MPESA_TILL_VERSION,
+            MARUPURUPU_VERSION,
             true
         );
 
         // Localize script
-        wp_localize_script('mpesa-order-status', 'mpesa_order_params', array(
+        wp_localize_script('marupurupu-order-status', 'marupurupu_order_params', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'order_id' => $order_id,
             'order_key' => $order->get_order_key(),
-            'check_status_nonce' => wp_create_nonce('mpesa_check_status'),
-            'retry_payment_nonce' => wp_create_nonce('mpesa_retry_payment'),
-            'verify_code_nonce' => wp_create_nonce('mpesa_verify_code'),
+            'check_status_nonce' => wp_create_nonce('marupurupu_check_status'),
+            'retry_payment_nonce' => wp_create_nonce('marupurupu_retry_payment'),
+            'verify_code_nonce' => wp_create_nonce('marupurupu_verify_code'),
         ));
     }
 
@@ -76,7 +76,7 @@ class Mpesa_Order_Received {
             return;
         }
 
-        $transaction = Mpesa_Helpers::get_transaction_by_order_id($order_id);
+        $transaction = Marupurupu_Helpers::get_transaction_by_order_id($order_id);
 
         if (!$transaction) {
             return;
@@ -263,4 +263,4 @@ class Mpesa_Order_Received {
 }
 
 // Initialize
-Mpesa_Order_Received::init();
+Marupurupu_Order_Received::init();

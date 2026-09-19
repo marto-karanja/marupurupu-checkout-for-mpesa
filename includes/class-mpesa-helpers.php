@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Helpers {
+class Marupurupu_Helpers {
 
     /**
      * Format phone number to M-Pesa format (254XXXXXXXXX)
@@ -36,7 +36,7 @@ class Mpesa_Helpers {
      */
     public static function validate_phone_number($phone) {
         $phone = self::format_phone_number($phone);
-        return preg_match('/^254[0-9]{9}$/', $phone);
+        return 1 === preg_match('/^254[0-9]{9}\z/', $phone);
     }
 
     /**
@@ -44,7 +44,7 @@ class Mpesa_Helpers {
      */
     public static function get_transaction_by_order_id($order_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE order_id = %d ORDER BY created_at DESC LIMIT 1",
@@ -57,7 +57,7 @@ class Mpesa_Helpers {
      */
     public static function get_transaction_by_checkout_id($checkout_request_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE checkout_request_id = %s",
@@ -70,7 +70,7 @@ class Mpesa_Helpers {
      */
     public static function get_transaction_by_mpesa_id($transaction_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE transaction_id = %s",
@@ -83,7 +83,7 @@ class Mpesa_Helpers {
      */
     public static function get_order_transactions($order_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         return $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $table_name WHERE order_id = %d ORDER BY created_at DESC",
@@ -96,7 +96,7 @@ class Mpesa_Helpers {
      */
     public static function get_transaction_stats($days = 30) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         $date_from = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
 
@@ -194,7 +194,7 @@ class Mpesa_Helpers {
      */
     public static function get_pending_transactions($minutes = 2) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         $date_threshold = gmdate('Y-m-d H:i:s', strtotime("-{$minutes} minutes"));
 
@@ -225,7 +225,7 @@ class Mpesa_Helpers {
             : 'shop_order';
 
         add_meta_box(
-            'mpesa_transaction_details',
+            'marupurupu_transaction_details',
             __('M-Pesa Transaction Details', 'marupurupu-checkout-for-mpesa'),
             array(__CLASS__, 'render_mpesa_meta_box'),
             $screen,
@@ -282,10 +282,10 @@ class Mpesa_Helpers {
             echo '<h4>' . esc_html__('Manual Payment Confirmation', 'marupurupu-checkout-for-mpesa') . '</h4>';
             echo '<p class="description">' . esc_html__('If payment was successful but not automatically confirmed, enter the M-Pesa receipt number below:', 'marupurupu-checkout-for-mpesa') . '</p>';
             echo '<form method="post" action="">';
-            echo '<input type="hidden" name="mpesa_manual_confirm_nonce" value="' . esc_attr(wp_create_nonce('mpesa_manual_confirm_' . $order_id)) . '">';
+            echo '<input type="hidden" name="marupurupu_manual_confirm_nonce" value="' . esc_attr(wp_create_nonce('marupurupu_manual_confirm_' . $order_id)) . '">';
             echo '<input type="hidden" name="order_id" value="' . esc_attr($order_id) . '">';
-            echo '<p><input type="text" name="mpesa_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'marupurupu-checkout-for-mpesa') . '" style="width: 100%;" required></p>';
-            echo '<p><button type="submit" name="mpesa_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'marupurupu-checkout-for-mpesa') . '</button></p>';
+            echo '<p><input type="text" name="marupurupu_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'marupurupu-checkout-for-mpesa') . '" style="width: 100%;" required></p>';
+            echo '<p><button type="submit" name="marupurupu_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'marupurupu-checkout-for-mpesa') . '</button></p>';
             echo '</form>';
         }
 
@@ -296,15 +296,15 @@ class Mpesa_Helpers {
      * Handle manual payment confirmation
      */
     public static function handle_manual_confirmation() {
-        if (!isset($_POST['mpesa_manual_confirm'], $_POST['order_id'], $_POST['mpesa_receipt_number'], $_POST['mpesa_manual_confirm_nonce'])) {
+        if (!isset($_POST['marupurupu_manual_confirm'], $_POST['order_id'], $_POST['marupurupu_receipt_number'], $_POST['marupurupu_manual_confirm_nonce'])) {
             return;
         }
 
         $order_id = intval($_POST['order_id']);
-        $receipt_number = sanitize_text_field(wp_unslash($_POST['mpesa_receipt_number']));
+        $receipt_number = sanitize_text_field(wp_unslash($_POST['marupurupu_receipt_number']));
 
         // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mpesa_manual_confirm_nonce'])), 'mpesa_manual_confirm_' . $order_id)) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['marupurupu_manual_confirm_nonce'])), 'marupurupu_manual_confirm_' . $order_id)) {
             add_action('admin_notices', function() {
                 echo '<div class="error"><p>' . esc_html__('Security check failed.', 'marupurupu-checkout-for-mpesa') . '</p></div>';
             });
@@ -325,7 +325,7 @@ class Mpesa_Helpers {
         }
 
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         // Update transaction
         $wpdb->update(
@@ -366,16 +366,7 @@ class Mpesa_Helpers {
 }
 
 // Add meta box to order page
-add_action('add_meta_boxes', array('Mpesa_Helpers', 'add_mpesa_meta_box'));
+add_action('add_meta_boxes', array('Marupurupu_Helpers', 'add_mpesa_meta_box'));
 
 // Handle manual payment confirmation
-add_action('admin_init', array('Mpesa_Helpers', 'handle_manual_confirmation'));
-
-// Older versions scheduled a daily 'mpesa_clean_old_logs' event for a
-// Mpesa_Helpers::clean_old_logs() method that has since been removed (the
-// plugin now logs through WooCommerce's own logger). Sites that ran one of
-// those versions still have the event scheduled, and firing it would call a
-// method that no longer exists -- so unschedule it if it's still there.
-if (wp_next_scheduled('mpesa_clean_old_logs')) {
-    wp_clear_scheduled_hook('mpesa_clean_old_logs');
-}
+add_action('admin_init', array('Marupurupu_Helpers', 'handle_manual_confirmation'));

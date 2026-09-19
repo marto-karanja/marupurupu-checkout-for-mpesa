@@ -7,25 +7,25 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Ajax {
+class Marupurupu_Ajax {
 
     /**
      * Initialize AJAX handlers
      */
     public static function init() {
         // For logged-in users
-        add_action('wp_ajax_mpesa_check_status', array(__CLASS__, 'check_payment_status'));
+        add_action('wp_ajax_marupurupu_check_status', array(__CLASS__, 'check_payment_status'));
 
         // For non-logged-in users (customer checking their order)
-        add_action('wp_ajax_nopriv_mpesa_check_status', array(__CLASS__, 'check_payment_status'));
+        add_action('wp_ajax_nopriv_marupurupu_check_status', array(__CLASS__, 'check_payment_status'));
 
         // Retry payment
-        add_action('wp_ajax_mpesa_retry_payment', array(__CLASS__, 'retry_payment'));
-        add_action('wp_ajax_nopriv_mpesa_retry_payment', array(__CLASS__, 'retry_payment'));
+        add_action('wp_ajax_marupurupu_retry_payment', array(__CLASS__, 'retry_payment'));
+        add_action('wp_ajax_nopriv_marupurupu_retry_payment', array(__CLASS__, 'retry_payment'));
 
         // Verify transaction code
-        add_action('wp_ajax_mpesa_verify_code', array(__CLASS__, 'verify_transaction_code'));
-        add_action('wp_ajax_nopriv_mpesa_verify_code', array(__CLASS__, 'verify_transaction_code'));
+        add_action('wp_ajax_marupurupu_verify_code', array(__CLASS__, 'verify_transaction_code'));
+        add_action('wp_ajax_nopriv_marupurupu_verify_code', array(__CLASS__, 'verify_transaction_code'));
     }
 
     /**
@@ -49,7 +49,7 @@ class Mpesa_Ajax {
      * Check payment status via AJAX
      */
     public static function check_payment_status() {
-        check_ajax_referer('mpesa_check_status', 'nonce');
+        check_ajax_referer('marupurupu_check_status', 'nonce');
 
         $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
         $order_key = isset($_POST['order_key']) ? sanitize_text_field(wp_unslash($_POST['order_key'])) : '';
@@ -65,7 +65,7 @@ class Mpesa_Ajax {
         }
 
         // Get transaction
-        $transaction = Mpesa_Helpers::get_transaction_by_order_id($order_id);
+        $transaction = Marupurupu_Helpers::get_transaction_by_order_id($order_id);
 
         if (!$transaction) {
             wp_send_json_error(array('message' => __('No transaction found.', 'marupurupu-checkout-for-mpesa')));
@@ -102,7 +102,7 @@ class Mpesa_Ajax {
      * Retry payment
      */
     public static function retry_payment() {
-        check_ajax_referer('mpesa_retry_payment', 'nonce');
+        check_ajax_referer('marupurupu_retry_payment', 'nonce');
 
         $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
         $order_key = isset($_POST['order_key']) ? sanitize_text_field(wp_unslash($_POST['order_key'])) : '';
@@ -123,7 +123,7 @@ class Mpesa_Ajax {
         }
 
         // Validate phone number
-        if (!preg_match('/^254[0-9]{9}$/', $phone)) {
+        if (!Marupurupu_Gateway::is_valid_phone_number($phone)) {
             wp_send_json_error(array('message' => __('Please enter a valid phone number (format: 254XXXXXXXXX).', 'marupurupu-checkout-for-mpesa')));
         }
 
@@ -136,7 +136,7 @@ class Mpesa_Ajax {
         // M-Pesa STK Push prompts against it. Capped per order, not per
         // IP/phone, since order_key is already the actual authorization
         // boundary this endpoint has.
-        $rate_limit_key = 'mpesa_retry_rl_' . $order_id;
+        $rate_limit_key = 'marupurupu_retry_rl_' . $order_id;
         $attempts = (int) get_transient($rate_limit_key);
         if ($attempts >= 3) {
             wp_send_json_error(array('message' => __('Too many payment retry attempts for this order. Please wait a few minutes and try again.', 'marupurupu-checkout-for-mpesa')));
@@ -151,7 +151,7 @@ class Mpesa_Ajax {
         }
 
         // Initialize M-Pesa API
-        $mpesa_api = new Mpesa_API(
+        $marupurupu_api = new Marupurupu_API(
             $gateway->consumer_key,
             $gateway->consumer_secret,
             $gateway->shortcode,
@@ -161,7 +161,7 @@ class Mpesa_Ajax {
         );
 
         // Initiate STK Push
-        $response = $mpesa_api->stk_push(
+        $response = $marupurupu_api->stk_push(
             $phone,
             $order->get_total(),
             $order_id,
@@ -171,7 +171,7 @@ class Mpesa_Ajax {
         if ($response && isset($response['ResponseCode']) && $response['ResponseCode'] == '0') {
             // Save new transaction attempt
             global $wpdb;
-            $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+            $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
             $wpdb->insert(
                 $table_name,
@@ -212,7 +212,7 @@ class Mpesa_Ajax {
      * Verify transaction code entered by customer
      */
     public static function verify_transaction_code() {
-        check_ajax_referer('mpesa_verify_code', 'nonce');
+        check_ajax_referer('marupurupu_verify_code', 'nonce');
 
         $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
         $order_key = isset($_POST['order_key']) ? sanitize_text_field(wp_unslash($_POST['order_key'])) : '';
@@ -238,7 +238,7 @@ class Mpesa_Ajax {
 
         // Update transaction with customer-provided code
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         $existing = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE order_id = %d ORDER BY created_at DESC LIMIT 1",
@@ -287,4 +287,4 @@ class Mpesa_Ajax {
 }
 
 // Initialize AJAX handlers
-Mpesa_Ajax::init();
+Marupurupu_Ajax::init();

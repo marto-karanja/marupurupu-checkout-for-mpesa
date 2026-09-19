@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_API {
+class Marupurupu_API {
 
     private $consumer_key;
     private $consumer_secret;

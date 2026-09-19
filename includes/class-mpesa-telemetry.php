@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Mpesa_Telemetry {
+class Marupurupu_Telemetry {
 
     /**
      * Telemetry endpoint URL
@@ -35,24 +35,24 @@ class Mpesa_Telemetry {
         }
 
         // Schedule events
-        add_action('mpesa_weekly_heartbeat', array(__CLASS__, 'send_heartbeat'));
-        add_action('mpesa_daily_stats', array(__CLASS__, 'send_daily_stats'));
+        add_action('marupurupu_weekly_heartbeat', array(__CLASS__, 'send_heartbeat'));
+        add_action('marupurupu_daily_stats', array(__CLASS__, 'send_daily_stats'));
 
         // Hook into plugin events
-        add_action('mpesa_payment_completed', array(__CLASS__, 'track_payment_success'));
-        add_action('mpesa_payment_failed', array(__CLASS__, 'track_payment_failure'));
-        add_action('mpesa_feature_used', array(__CLASS__, 'track_feature_usage'), 10, 2);
+        add_action('marupurupu_payment_completed', array(__CLASS__, 'track_payment_success'));
+        add_action('marupurupu_payment_failed', array(__CLASS__, 'track_payment_failure'));
+        add_action('marupurupu_feature_used', array(__CLASS__, 'track_feature_usage'), 10, 2);
 
         // Track errors
-        add_action('mpesa_error_occurred', array(__CLASS__, 'track_error'), 10, 3);
+        add_action('marupurupu_error_occurred', array(__CLASS__, 'track_error'), 10, 3);
 
         // Schedule recurring events if not already scheduled
-        if (!wp_next_scheduled('mpesa_weekly_heartbeat')) {
-            wp_schedule_event(time(), 'weekly', 'mpesa_weekly_heartbeat');
+        if (!wp_next_scheduled('marupurupu_weekly_heartbeat')) {
+            wp_schedule_event(time(), 'weekly', 'marupurupu_weekly_heartbeat');
         }
 
-        if (!wp_next_scheduled('mpesa_daily_stats')) {
-            wp_schedule_event(strtotime('tomorrow 3am'), 'daily', 'mpesa_daily_stats');
+        if (!wp_next_scheduled('marupurupu_daily_stats')) {
+            wp_schedule_event(strtotime('tomorrow 3am'), 'daily', 'marupurupu_daily_stats');
         }
     }
 
@@ -87,7 +87,7 @@ class Mpesa_Telemetry {
 
         // Add common fields
         $data['site_id'] = self::get_site_id();
-        $data['plugin_version'] = WC_MPESA_TILL_VERSION;
+        $data['plugin_version'] = MARUPURUPU_VERSION;
         $data['timestamp'] = current_time('mysql');
 
         // Send non-blocking request
@@ -95,7 +95,7 @@ class Mpesa_Telemetry {
             'body' => wp_json_encode($data),
             'headers' => array(
                 'Content-Type' => 'application/json',
-                'User-Agent' => 'WC-Mpesa-Till/' . WC_MPESA_TILL_VERSION,
+                'User-Agent' => 'WC-Mpesa-Till/' . MARUPURUPU_VERSION,
                 'X-Mpesa-Telemetry-Key' => self::SHARED_SECRET
             ),
             'timeout' => 5,
@@ -138,7 +138,7 @@ class Mpesa_Telemetry {
      */
     public static function send_daily_stats() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
+        $table_name = $wpdb->prefix . 'marupurupu_transactions';
 
         // Get yesterday's stats
         $yesterday = gmdate('Y-m-d', strtotime('-1 day'));
@@ -195,7 +195,7 @@ class Mpesa_Telemetry {
         self::send($data);
 
         // Clear old feature usage data
-        delete_option('mpesa_feature_usage');
+        delete_option('marupurupu_feature_usage');
     }
 
     /**
@@ -203,8 +203,8 @@ class Mpesa_Telemetry {
      */
     public static function track_payment_success() {
         // Increment local counter
-        $count = get_option('mpesa_success_count', 0);
-        update_option('mpesa_success_count', $count + 1, false);
+        $count = get_option('marupurupu_success_count', 0);
+        update_option('marupurupu_success_count', $count + 1, false);
     }
 
     /**
@@ -212,8 +212,8 @@ class Mpesa_Telemetry {
      */
     public static function track_payment_failure() {
         // Increment local counter
-        $count = get_option('mpesa_failure_count', 0);
-        update_option('mpesa_failure_count', $count + 1, false);
+        $count = get_option('marupurupu_failure_count', 0);
+        update_option('marupurupu_failure_count', $count + 1, false);
     }
 
     /**
@@ -223,7 +223,7 @@ class Mpesa_Telemetry {
      * @param array $metadata Optional metadata (anonymized)
      */
     public static function track_feature_usage($feature_name, $metadata = array()) {
-        $usage = get_option('mpesa_feature_usage', array());
+        $usage = get_option('marupurupu_feature_usage', array());
 
         if (!isset($usage[$feature_name])) {
             $usage[$feature_name] = array(
@@ -236,7 +236,7 @@ class Mpesa_Telemetry {
         $usage[$feature_name]['count']++;
         $usage[$feature_name]['last_used'] = current_time('mysql');
 
-        update_option('mpesa_feature_usage', $usage, false);
+        update_option('marupurupu_feature_usage', $usage, false);
 
         // Send weekly aggregates (not per-use to reduce traffic)
         if (gmdate('w') == 0) { // Sunday
@@ -248,7 +248,7 @@ class Mpesa_Telemetry {
      * Send feature usage data
      */
     private static function send_feature_usage() {
-        $usage = get_option('mpesa_feature_usage', array());
+        $usage = get_option('marupurupu_feature_usage', array());
 
         if (empty($usage)) {
             return;
@@ -291,7 +291,7 @@ class Mpesa_Telemetry {
      * @param float $duration_ms Duration in milliseconds
      */
     public static function track_performance($metric_name, $duration_ms) {
-        $metrics = get_transient('mpesa_performance_metrics');
+        $metrics = get_transient('marupurupu_performance_metrics');
 
         if (!$metrics) {
             $metrics = array();
@@ -311,7 +311,7 @@ class Mpesa_Telemetry {
         $metrics[$metric_name]['min_ms'] = min($metrics[$metric_name]['min_ms'], $duration_ms);
         $metrics[$metric_name]['max_ms'] = max($metrics[$metric_name]['max_ms'], $duration_ms);
 
-        set_transient('mpesa_performance_metrics', $metrics, WEEK_IN_SECONDS);
+        set_transient('marupurupu_performance_metrics', $metrics, WEEK_IN_SECONDS);
 
         // Send weekly
         if (gmdate('w') == 0) {
@@ -323,7 +323,7 @@ class Mpesa_Telemetry {
      * Send performance metrics
      */
     private static function send_performance_metrics() {
-        $metrics = get_transient('mpesa_performance_metrics');
+        $metrics = get_transient('marupurupu_performance_metrics');
 
         if (empty($metrics)) {
             return;
@@ -344,7 +344,7 @@ class Mpesa_Telemetry {
         self::send($data);
 
         // Clear metrics after sending
-        delete_transient('mpesa_performance_metrics');
+        delete_transient('marupurupu_performance_metrics');
     }
 
     /**
@@ -378,8 +378,8 @@ class Mpesa_Telemetry {
         self::send($data);
 
         // Unschedule events
-        wp_clear_scheduled_hook('mpesa_weekly_heartbeat');
-        wp_clear_scheduled_hook('mpesa_daily_stats');
+        wp_clear_scheduled_hook('marupurupu_weekly_heartbeat');
+        wp_clear_scheduled_hook('marupurupu_daily_stats');
     }
 
     /**
@@ -397,7 +397,7 @@ class Mpesa_Telemetry {
 
         foreach ($fields as $field) {
             $value = $gateway->get_option($field);
-            if (!empty($value) && Mpesa_Encryption::is_encrypted($value)) {
+            if (!empty($value) && Marupurupu_Encryption::is_encrypted($value)) {
                 return true;
             }
         }
@@ -419,8 +419,8 @@ class Mpesa_Telemetry {
 }
 
 // Initialize telemetry
-add_action('plugins_loaded', array('Mpesa_Telemetry', 'init'), 20);
+add_action('plugins_loaded', array('Marupurupu_Telemetry', 'init'), 20);
 
 // Track activation/deactivation
-register_activation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Mpesa_Telemetry', 'track_activation'));
-register_deactivation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Mpesa_Telemetry', 'track_deactivation'));
+register_activation_hook(MARUPURUPU_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Marupurupu_Telemetry', 'track_activation'));
+register_deactivation_hook(MARUPURUPU_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Marupurupu_Telemetry', 'track_deactivation'));

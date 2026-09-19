@@ -10,14 +10,14 @@
         maxChecks: 60, // Check for 5 minutes (60 * 5 seconds)
 
         init: function() {
-            if (typeof mpesa_order_params === 'undefined') {
+            if (typeof marupurupu_order_params === 'undefined') {
                 return;
             }
 
             // Clear reload flags if we've successfully reloaded and showing success
             if (sessionStorage && $('#mpesa-status-success').is(':visible')) {
-                sessionStorage.removeItem('mpesa_payment_confirmed');
-                sessionStorage.removeItem('mpesa_reload_done');
+                sessionStorage.removeItem('marupurupu_payment_confirmed');
+                sessionStorage.removeItem('marupurupu_reload_done');
                 console.log('M-Pesa: Cleared reload flags after successful reload');
             }
 
@@ -123,13 +123,13 @@
             }
 
             $.ajax({
-                url: mpesa_order_params.ajax_url,
+                url: marupurupu_order_params.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'mpesa_check_status',
-                    nonce: mpesa_order_params.check_status_nonce,
-                    order_id: mpesa_order_params.order_id,
-                    order_key: mpesa_order_params.order_key
+                    action: 'marupurupu_check_status',
+                    nonce: marupurupu_order_params.check_status_nonce,
+                    order_id: marupurupu_order_params.order_id,
+                    order_key: marupurupu_order_params.order_key
                 },
                 success: function(response) {
                     if (response.success) {
@@ -194,7 +194,7 @@
 
             // Set a flag to prevent multiple reloads
             if (sessionStorage) {
-                sessionStorage.setItem('mpesa_payment_confirmed', 'true');
+                sessionStorage.setItem('marupurupu_payment_confirmed', 'true');
             }
 
             // Reload page ONCE after 3 seconds to show updated order details
@@ -211,9 +211,9 @@
                     clearInterval(countdownInterval);
 
                     // Only reload if we haven't already
-                    if (!sessionStorage || sessionStorage.getItem('mpesa_reload_done') !== 'true') {
+                    if (!sessionStorage || sessionStorage.getItem('marupurupu_reload_done') !== 'true') {
                         if (sessionStorage) {
-                            sessionStorage.setItem('mpesa_reload_done', 'true');
+                            sessionStorage.setItem('marupurupu_reload_done', 'true');
                         }
                         location.reload();
                     }
@@ -300,13 +300,13 @@
             $button.prop('disabled', true).text('Sending...');
 
             $.ajax({
-                url: mpesa_order_params.ajax_url,
+                url: marupurupu_order_params.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'mpesa_retry_payment',
-                    nonce: mpesa_order_params.retry_payment_nonce,
-                    order_id: mpesa_order_params.order_id,
-                    order_key: mpesa_order_params.order_key,
+                    action: 'marupurupu_retry_payment',
+                    nonce: marupurupu_order_params.retry_payment_nonce,
+                    order_id: marupurupu_order_params.order_id,
+                    order_key: marupurupu_order_params.order_key,
                     phone: phone
                 },
                 success: function(response) {
@@ -354,13 +354,13 @@
             $button.prop('disabled', true).text('Verifying...');
 
             $.ajax({
-                url: mpesa_order_params.ajax_url,
+                url: marupurupu_order_params.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'mpesa_verify_code',
-                    nonce: mpesa_order_params.verify_code_nonce,
-                    order_id: mpesa_order_params.order_id,
-                    order_key: mpesa_order_params.order_key,
+                    action: 'marupurupu_verify_code',
+                    nonce: marupurupu_order_params.verify_code_nonce,
+                    order_id: marupurupu_order_params.order_id,
+                    order_key: marupurupu_order_params.order_key,
                     transaction_code: code
                 },
                 success: function(response) {

@@ -20,5 +20,5 @@ return [
         'wp-html-entities',
         'wp-i18n',
     ],
-    'version' => defined('WC_MPESA_TILL_VERSION') ? WC_MPESA_TILL_VERSION : '1.0.0',
+    'version' => defined('MARUPURUPU_VERSION') ? MARUPURUPU_VERSION : '1.0.0',
 ];
