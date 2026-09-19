@@ -1,4 +1,4 @@
-# Marupurupu Checkout for M-Pesa and WooCommerce
+# Marupurupu Checkout for M-Pesa
 
 Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. Supports both classic shortcode-based checkout and modern block-based checkout.
 

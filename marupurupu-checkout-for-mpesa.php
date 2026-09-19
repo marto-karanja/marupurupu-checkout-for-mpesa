@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Marupurupu Checkout for M-Pesa and WooCommerce
+ * Plugin Name: Marupurupu Checkout for M-Pesa
  * Plugin URI: https://github.com/marto-karanja/marupurupu-checkout-for-mpesa
  * Description: Accept M-Pesa Till payments via STK Push for WooCommerce
- * Version: 1.6.0
+ * Version: 1.6.1
  * Author: Martin Mburu
  * Author URI: https://billtoolbox.com
  * Text Domain: marupurupu-checkout-for-mpesa
@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
  */
 
 // Define plugin constants
-define('MARUPURUPU_VERSION', '1.6.0');
+define('MARUPURUPU_VERSION', '1.6.1');
 define('MARUPURUPU_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MARUPURUPU_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -48,7 +48,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 }
 
 function marupurupu_woocommerce_missing_notice() {
-    echo '<div class="error"><p><strong>Marupurupu Checkout for M-Pesa and WooCommerce</strong> requires WooCommerce to be installed and active.</p></div>';
+    echo '<div class="error"><p><strong>Marupurupu Checkout for M-Pesa</strong> requires WooCommerce to be installed and active.</p></div>';
 }
 
 /**

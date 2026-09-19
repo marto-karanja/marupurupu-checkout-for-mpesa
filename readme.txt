@@ -1,10 +1,10 @@
-=== Marupurupu Checkout for M-Pesa and WooCommerce ===
+=== Marupurupu Checkout for M-Pesa ===
 Contributors: marto46
 Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Accept M-Pesa Till payments via STK Push for WooCommerce. Supports both classic 
 
 == Description ==
 
-Marupurupu Checkout for M-Pesa and WooCommerce allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
+Marupurupu Checkout for M-Pesa allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
 
 **Independent plugin — no affiliation.** This plugin is developed independently. It is not affiliated with, endorsed by, or sponsored by Safaricom, M-Pesa, WooCommerce or Automattic. M-Pesa, Safaricom and WooCommerce are trademarks of their respective owners, used here only to describe what the plugin works with.
 
@@ -83,7 +83,7 @@ This plugin connects to the third-party services below. Nothing is sent to Safar
 
 1. Log in to your WordPress dashboard
 2. Navigate to Plugins > Add New
-3. Search for "Marupurupu Checkout for M-Pesa and WooCommerce"
+3. Search for "Marupurupu Checkout for M-Pesa"
 4. Click "Install Now"
 5. Activate the plugin
 
@@ -155,6 +155,9 @@ The plugin automatically generates a callback URL, including a secret token uniq
 
 == Changelog ==
 
+= 1.6.1 - 2026-09-19 =
+* Changed: The plugin's display name is now "Marupurupu Checkout for M-Pesa" (the "and WooCommerce" suffix was removed), following WordPress.org Plugin Review Team feedback that "WooCommerce" is a restricted term in plugin names. The slug, text domain, settings, saved credentials, orders and the Safaricom callback URL are all unchanged. No functional change.
+
 = 1.6.0 - 2026-09-19 =
 * Changed: **Unique naming prefix.** Every class, function, constant, option, transient, scheduled event, hook, AJAX action, script handle and admin menu slug the plugin registers now uses the prefix `marupurupu_` / `Marupurupu_` / `MARUPURUPU_` instead of the generic `mpesa` (which could collide with other M-Pesa plugins). The custom transactions table is now `{prefix}marupurupu_transactions`.
 * Added: **Automatic one-time data migration.** On the first request after updating, data stored under the old names is moved across: the transactions table is renamed (a single atomic `RENAME TABLE`; no rows are copied or lost), saved options and dismissed notices are carried over, and leftover scheduled events are cleared. Your gateway settings, saved credentials and payment history are unchanged, and no action is needed. The migration retries by itself if it cannot finish, and never overwrites newer data.
@@ -171,7 +174,7 @@ The plugin automatically generates a callback URL, including a secret token uniq
 * Removed: `config-sample.php`, which described a constants-based credential mechanism that the plugin never implemented. Credentials are entered on the gateway settings screen and stored encrypted.
 
 = 1.5.5 - 2026-09-18 =
-* Changed: **Renamed** to "Marupurupu Checkout for M-Pesa and WooCommerce" (slug, folder, main file, and text domain `marupurupu-checkout-for-mpesa`), following WordPress.org Plugin Review Team feedback that the previous name led with a third-party trademark. "Marupurupu" is a Swahili word meaning "allowances". No functional change: internal identifiers, the database table (`wp_mpesa_till_transactions`), the option keys, and the Daraja callback URL (`/wc-api/wc_mpesa_till_callback/`) are all unchanged. Existing installs need a manual reinstall to pick up the new folder name (WordPress cannot rename an installed plugin's folder in an update); stored settings are unaffected.
+* Changed: **Renamed** to "Marupurupu Checkout for M-Pesa" (slug, folder, main file, and text domain `marupurupu-checkout-for-mpesa`), following WordPress.org Plugin Review Team feedback that the previous name led with a third-party trademark. "Marupurupu" is a Swahili word meaning "allowances". No functional change: internal identifiers, the database table (`wp_mpesa_till_transactions`), the option keys, and the Daraja callback URL (`/wc-api/wc_mpesa_till_callback/`) are all unchanged. Existing installs need a manual reinstall to pick up the new folder name (WordPress cannot rename an installed plugin's folder in an update); stored settings are unaffected.
 * Changed: "Not affiliated" disclaimer wording made explicit in the plugin description.
 * Changed: `Plugin URI` and the readme's source-code link now point to the renamed public repository, `github.com/marto-karanja/marupurupu-checkout-for-mpesa` (the previous repository name led with a third-party trademark).
 
