@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: M-Pesa Gateway for WooCommerce
- * Plugin URI: https://billtoolbox.com
+ * Plugin Name: Marupurupu Checkout for M-Pesa and WooCommerce
+ * Plugin URI: https://github.com/marto-karanja/marupurupu-checkout-for-mpesa
  * Description: Accept M-Pesa Till payments via STK Push for WooCommerce
- * Version: 1.5.0
+ * Version: 1.5.5
  * Author: Martin Mburu
  * Author URI: https://billtoolbox.com
- * Text Domain: mpesa-gateway-for-woocommerce
+ * Text Domain: marupurupu-checkout-for-mpesa
  * Requires at least: 5.3
  * Requires PHP: 7.4
  * WC requires at least: 3.0
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_MPESA_TILL_VERSION', '1.5.0');
+define('WC_MPESA_TILL_VERSION', '1.5.5');
 define('WC_MPESA_TILL_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WC_MPESA_TILL_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -33,7 +33,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
 }
 
 function wc_mpesa_till_woocommerce_missing_notice() {
-    echo '<div class="error"><p><strong>WooCommerce M-Pesa Till Payment Gateway</strong> requires WooCommerce to be installed and active.</p></div>';
+    echo '<div class="error"><p><strong>Marupurupu Checkout for M-Pesa and WooCommerce</strong> requires WooCommerce to be installed and active.</p></div>';
 }
 
 /**

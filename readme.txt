@@ -1,10 +1,10 @@
-=== M-Pesa Gateway for WooCommerce ===
+=== Marupurupu Checkout for M-Pesa and WooCommerce ===
 Contributors: marto46
 Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,9 @@ Accept M-Pesa Till payments via STK Push for WooCommerce. Supports both classic 
 
 == Description ==
 
-M-Pesa Gateway for WooCommerce allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
+Marupurupu Checkout for M-Pesa and WooCommerce allows you to accept payments via M-Pesa (Safaricom) using the STK Push (Lipa Na M-Pesa Online) feature. This plugin integrates seamlessly with WooCommerce and supports both classic shortcode-based checkout and modern block-based checkout.
+
+**Independent plugin — no affiliation.** This plugin is developed independently. It is not affiliated with, endorsed by, or sponsored by Safaricom, M-Pesa, WooCommerce or Automattic. M-Pesa, Safaricom and WooCommerce are trademarks of their respective owners, used here only to describe what the plugin works with.
 
 = Features =
 
@@ -39,7 +41,7 @@ M-Pesa Gateway for WooCommerce allows you to accept payments via M-Pesa (Safaric
 
 = Setup =
 
-1. Upload the plugin to `/wp-content/plugins/mpesa-gateway-for-woocommerce/`
+1. Upload the plugin to `/wp-content/plugins/marupurupu-checkout-for-mpesa/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Go to WooCommerce > Settings > Payments
 4. Enable "M-Pesa Till Payment"
@@ -68,7 +70,7 @@ M-Pesa Gateway for WooCommerce allows you to accept payments via M-Pesa (Safaric
 
 1. Log in to your WordPress dashboard
 2. Navigate to Plugins > Add New
-3. Search for "M-Pesa Gateway for WooCommerce"
+3. Search for "Marupurupu Checkout for M-Pesa and WooCommerce"
 4. Click "Install Now"
 5. Activate the plugin
 
@@ -140,8 +142,36 @@ The plugin automatically generates a callback URL, including a secret token uniq
 
 == Changelog ==
 
+= 1.5.5 - 2026-09-18 =
+* Changed: **Renamed** to "Marupurupu Checkout for M-Pesa and WooCommerce" (slug, folder, main file, and text domain `marupurupu-checkout-for-mpesa`), following WordPress.org Plugin Review Team feedback that the previous name led with a third-party trademark. "Marupurupu" is a Swahili word meaning "allowances". No functional change: internal identifiers, the database table (`wp_mpesa_till_transactions`), the option keys, and the Daraja callback URL (`/wc-api/wc_mpesa_till_callback/`) are all unchanged. Existing installs need a manual reinstall to pick up the new folder name (WordPress cannot rename an installed plugin's folder in an update); stored settings are unaffected.
+* Changed: "Not affiliated" disclaimer wording made explicit in the plugin description.
+* Changed: `Plugin URI` and the readme's source-code link now point to the renamed public repository, `github.com/marto-karanja/marupurupu-checkout-for-mpesa` (the previous repository name led with a third-party trademark).
+
+= 1.5.4 - 2026-09-18 =
+* Fixed: On the gateway settings page, the "Change" button for an already-saved Consumer Key/Secret/Passkey did nothing and there was no field to type a new value into, so saved credentials could not be replaced from the settings screen. Credentials can be changed again.
+* Fixed: A stale daily "clean old logs" scheduled task, left behind by older versions for a function that no longer exists, could raise a fatal error on PHP 8 each time WordPress cron ran it. It is now unscheduled.
+* Fixed: Bulk "Export to CSV" on the M-Pesa Transactions page sent its download headers after the page had already started rendering, so the file could not be delivered cleanly. It now runs before any output.
+* Fixed: The transactions page stylesheet (`admin.css`) was referenced but not shipped, so the page's styles came only from an inline block. It is now a real, enqueued stylesheet.
+* Fixed: The customer-facing "retry payment" and "already paid? enter your code" actions could be used on an order that was already paid (overwriting its confirmed M-Pesa receipt and moving it back to on-hold) or on an order placed with a different payment method. Both now only act on unpaid orders placed with this gateway.
+* Fixed: The retry-payment form on the thank-you page could re-appear after a payment succeeded within the first 2 minutes.
+* Fixed: Blocks-checkout script now uses the plugin version as its cache-busting version, instead of a hardcoded `1.0.0`.
+* Security: Safaricom callback data is now sanitized (`sanitize_text_field`) before it is logged, stored, or shown in order notes; nonces are sanitized before verification; the callback secret is sanitized before comparison; the bulk-export `IN (...)` list now goes through `$wpdb->prepare()`.
+* Changed: All inline `<script>`/`<style>` blocks and `onclick` handlers moved to properly enqueued files (`wp_enqueue_script`/`wp_enqueue_style`, with report data passed via `wp_localize_script`).
+* Changed: Late output escaping added where WooCommerce/WordPress return pre-built HTML (`wc_price`, `paginate_links`, `wpautop`), and `wp_die()` messages now use `esc_html__()`.
+* Changed: Bundled Chart.js updated from 3.9.1 to 4.5.1 (see Credits).
+* Removed: Unused `mpesa-blocks-improved.js` (never loaded by the plugin).
+
+= 1.5.3 - 2026-09-09 =
+* Fixed: `Plugin URI` and `Author URI` in the plugin header were identical (`https://billtoolbox.com`) — flagged during WordPress.org submission review (both must be different, or one omitted). `Plugin URI` now points to the public GitHub source; `Author URI` stays `https://billtoolbox.com`.
+
+= 1.5.2 - 2026-09-09 =
+* Changed: **Slug, folder, main file, and text domain renamed** from `mpesa-till-gateway` to `mpesa-payment-gateway`, matching the v1.5.1 display-name change and made ahead of first WordPress.org submission (self-service slug changes go away once review starts). No functional change — internal identifiers, the database table (`wp_mpesa_till_transactions`), the `WC_Mpesa_Till_Gateway` class name, and the Daraja callback URL (`/wc-api/wc_mpesa_till_callback/`) are all unchanged, matching the same precedent as the earlier `wc-mpesa-till-payment` → `mpesa-till-gateway` rename. **Existing installs on bonbargains.com/nairobistalls.com need a manual reinstall to pick this up** — WordPress cannot rename an installed plugin's folder via a normal update; deactivate, delete the old `mpesa-till-gateway` folder, install this version fresh, then reactivate. Stored settings are unaffected (kept under a WooCommerce option key, not tied to the folder name).
+
+= 1.5.1 - 2026-09-09 =
+* Changed: Display name updated from "M-Pesa Till Gateway for WooCommerce" to "M-Pesa Payment Gateway for WooCommerce" ahead of first WordPress.org submission — cosmetic only. The plugin slug (`mpesa-till-gateway` at the time; renamed again in 1.5.2, see above), text domain, folder name, main file name, database table, and the Daraja callback URL were all unchanged by this specific release; existing installs were unaffected.
+
 = 1.5.0 - 2026-08-31 =
-* **Renamed** from `wc-mpesa-till-payment` to `mpesa-gateway-for-woocommerce` (slug, folder, main file, text domain). WordPress.org restricts the term "wc" in plugin slugs — the previous name could never have been submitted. No functional change; internal identifiers, the database table, and the M-Pesa/Daraja callback URL are all unchanged, so existing installs keep working exactly as before once updated.
+* **Renamed** from `wc-mpesa-till-payment` to `mpesa-till-gateway` (slug, folder, main file, text domain) — see the 1.5.2 and 1.5.5 entries above for the further renames, most recently to `marupurupu-checkout-for-mpesa`. WordPress.org restricts the term "wc" in plugin slugs — the previous name could never have been submitted. No functional change; internal identifiers, the database table, and the M-Pesa/Daraja callback URL are all unchanged, so existing installs keep working exactly as before once updated.
 * Changed: Outbound Safaricom API calls (OAuth token, STK Push, status query) now use WordPress's own HTTP API (`wp_remote_get()`/`wp_remote_post()`) instead of calling cURL directly — same behavior (timeouts, SSL verification), but works correctly on hosts that restrict direct cURL usage and follows WordPress.org coding standards.
 * Fixed: 8 "Creation of dynamic property is deprecated" warnings on every settings-page load (PHP 8.2) — the gateway's credential fields are now properly declared class properties.
 * Fixed: numerous smaller correctness/compliance items found via a full run of the official WordPress.org Plugin Check tool — missing output escaping, missing translator comments on translatable strings with placeholders, `date()` calls affected by server timezone changed to `gmdate()`, superglobal reads missing `wp_unslash()`, `wp_redirect()` changed to `wp_safe_redirect()` for two admin actions added in 1.4.x, and a stale "Tested up to" header.
@@ -307,11 +337,17 @@ Based on: Safaricom Daraja API
 Uses: WooCommerce Payment Gateway API
 Blocks Integration: WooCommerce Blocks API
 
+= Third-party libraries =
+
+* [Chart.js](https://www.chartjs.org/) 4.5.1 (MIT License) — draws the charts on the Reports page. Bundled locally as `assets/js/chart.umd.js` (the library's own official minified build, unmodified). Human-readable source: https://github.com/chartjs/Chart.js (the `v4.5.1` tag) or https://www.npmjs.com/package/chart.js/v/4.5.1.
+
 == Additional Information ==
 
-* Documentation: Included in plugin folder
+* Source code: https://github.com/marto-karanja/marupurupu-checkout-for-mpesa
 * API Reference: https://developer.safaricom.co.ke/docs
 * WooCommerce Blocks: https://woocommerce.com/checkout-blocks/
+
+This plugin is not officially affiliated with, endorsed by, or sponsored by Safaricom or M-Pesa. It integrates with Safaricom's publicly documented Daraja API.
 
 == Support ==
 

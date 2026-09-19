@@ -41,8 +41,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         $this->id = 'mpesa_till';
         $this->icon = '';
         $this->has_fields = true;
-        $this->method_title = __('M-Pesa Till Payment', 'mpesa-gateway-for-woocommerce');
-        $this->method_description = __('Accept M-Pesa payments via STK Push for Till Numbers', 'mpesa-gateway-for-woocommerce');
+        $this->method_title = __('M-Pesa Till Payment', 'marupurupu-checkout-for-mpesa');
+        $this->method_description = __('Accept M-Pesa payments via STK Push for Till Numbers', 'marupurupu-checkout-for-mpesa');
 
         // Load settings
         $this->init_form_fields();
@@ -103,93 +103,93 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
     public function init_form_fields() {
         $this->form_fields = array(
             'enabled' => array(
-                'title' => __('Enable/Disable', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Enable/Disable', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'checkbox',
-                'label' => __('Enable M-Pesa Till Payment', 'mpesa-gateway-for-woocommerce'),
+                'label' => __('Enable M-Pesa Till Payment', 'marupurupu-checkout-for-mpesa'),
                 'default' => 'no'
             ),
             'title' => array(
-                'title' => __('Title', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Title', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Payment method title that customers see during checkout.', 'mpesa-gateway-for-woocommerce'),
-                'default' => __('M-Pesa', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Payment method title that customers see during checkout.', 'marupurupu-checkout-for-mpesa'),
+                'default' => __('M-Pesa', 'marupurupu-checkout-for-mpesa'),
                 'desc_tip' => true,
             ),
             'description' => array(
-                'title' => __('Description', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Description', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'textarea',
-                'description' => __('Payment method description that customers see during checkout.', 'mpesa-gateway-for-woocommerce'),
-                'default' => __('Pay securely using M-Pesa.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Payment method description that customers see during checkout.', 'marupurupu-checkout-for-mpesa'),
+                'default' => __('Pay securely using M-Pesa.', 'marupurupu-checkout-for-mpesa'),
                 'desc_tip' => true,
             ),
             'testmode' => array(
-                'title' => __('Test Mode', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Test Mode', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'checkbox',
-                'label' => __('Enable Test Mode', 'mpesa-gateway-for-woocommerce'),
+                'label' => __('Enable Test Mode', 'marupurupu-checkout-for-mpesa'),
                 'default' => 'yes',
-                'description' => __('Use sandbox API credentials for testing.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Use sandbox API credentials for testing.', 'marupurupu-checkout-for-mpesa'),
             ),
             'shortcode' => array(
-                'title' => __('Business Shortcode', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Business Shortcode', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa Business Shortcode (used for authentication). For sandbox, use 174379.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa Business Shortcode (used for authentication). For sandbox, use 174379.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'till_number' => array(
-                'title' => __('Till Number', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Till Number', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa Till Number (Store Number). This can be the same as Shortcode for Till accounts.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa Till Number (Store Number). This can be the same as Shortcode for Till accounts.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'consumer_key' => array(
-                'title' => __('Consumer Key (Live)', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Consumer Key (Live)', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa API Consumer Key for production.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa API Consumer Key for production.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'consumer_secret' => array(
-                'title' => __('Consumer Secret (Live)', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Consumer Secret (Live)', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Consumer Secret for production.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa API Consumer Secret for production.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'test_consumer_key' => array(
-                'title' => __('Consumer Key (Test)', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Consumer Key (Test)', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Your M-Pesa API Consumer Key for sandbox.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa API Consumer Key for sandbox.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'test_consumer_secret' => array(
-                'title' => __('Consumer Secret (Test)', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Consumer Secret (Test)', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Consumer Secret for sandbox.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa API Consumer Secret for sandbox.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'passkey' => array(
-                'title' => __('Passkey', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Passkey', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'password',
-                'description' => __('Your M-Pesa API Passkey.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Your M-Pesa API Passkey.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'desc_tip' => true,
             ),
             'callback_url' => array(
-                'title' => __('Callback URL', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Callback URL', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'text',
-                'description' => __('Use this exact URL for the M-Pesa callback. It includes a secret token unique to this site; requests without a matching token are rejected. Do not edit or truncate it.', 'mpesa-gateway-for-woocommerce'),
+                'description' => __('Use this exact URL for the M-Pesa callback. It includes a secret token unique to this site; requests without a matching token are rejected. Do not edit or truncate it.', 'marupurupu-checkout-for-mpesa'),
                 'default' => '',
                 'custom_attributes' => array('readonly' => 'readonly'),
             ),
             'telemetry_enabled' => array(
-                'title' => __('Anonymous Usage Data', 'mpesa-gateway-for-woocommerce'),
+                'title' => __('Anonymous Usage Data', 'marupurupu-checkout-for-mpesa'),
                 'type' => 'checkbox',
-                'label' => __('Help improve this plugin by sharing anonymous usage data', 'mpesa-gateway-for-woocommerce'),
-                'description' => __('We collect anonymous usage statistics to improve the plugin (WordPress/WooCommerce/PHP versions, transaction counts and amount aggregates, error rates, feature usage). No phone numbers, order details, customer names, or M-Pesa credentials are ever included. Opt-in, off by default. See this plugin\'s Privacy Policy section (readme.txt) for the full field-by-field disclosure.', 'mpesa-gateway-for-woocommerce'),
+                'label' => __('Help improve this plugin by sharing anonymous usage data', 'marupurupu-checkout-for-mpesa'),
+                'description' => __('We collect anonymous usage statistics to improve the plugin (WordPress/WooCommerce/PHP versions, transaction counts and amount aggregates, error rates, feature usage). No phone numbers, order details, customer names, or M-Pesa credentials are ever included. Opt-in, off by default. See this plugin\'s Privacy Policy section (readme.txt) for the full field-by-field disclosure.', 'marupurupu-checkout-for-mpesa'),
                 'default' => 'no',
             ),
         );
@@ -200,20 +200,20 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     public function payment_fields() {
         if ($this->description) {
-            echo wpautop(wptexturize($this->description));
+            echo wp_kses_post(wpautop(wptexturize($this->description)));
         }
         ?>
         <fieldset id="wc-<?php echo esc_attr($this->id); ?>-form" class="wc-payment-form">
             <p class="form-row form-row-wide">
                 <label for="mpesa_phone_number">
-                    <?php esc_html_e('M-Pesa Phone Number', 'mpesa-gateway-for-woocommerce'); ?> <span class="required">*</span>
+                    <?php esc_html_e('M-Pesa Phone Number', 'marupurupu-checkout-for-mpesa'); ?> <span class="required">*</span>
                 </label>
                 <input id="mpesa_phone_number" name="mpesa_phone_number" type="tel"
                        placeholder="254XXXXXXXXX"
                        pattern="254[0-9]{9}"
                        maxlength="12"
                        required />
-                <small><?php esc_html_e('Enter phone number in format: 254XXXXXXXXX', 'mpesa-gateway-for-woocommerce'); ?></small>
+                <small><?php esc_html_e('Enter phone number in format: 254XXXXXXXXX', 'marupurupu-checkout-for-mpesa'); ?></small>
             </p>
         </fieldset>
         <?php
@@ -224,14 +224,14 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     public function validate_fields() {
         if (empty($_POST['mpesa_phone_number'])) {
-            wc_add_notice(__('M-Pesa phone number is required.', 'mpesa-gateway-for-woocommerce'), 'error');
+            wc_add_notice(__('M-Pesa phone number is required.', 'marupurupu-checkout-for-mpesa'), 'error');
             return false;
         }
 
         $phone = sanitize_text_field(wp_unslash($_POST['mpesa_phone_number']));
 
         if (!preg_match('/^254[0-9]{9}$/', $phone)) {
-            wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'mpesa-gateway-for-woocommerce'), 'error');
+            wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'marupurupu-checkout-for-mpesa'), 'error');
             return false;
         }
 
@@ -272,12 +272,12 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             $this->save_transaction($order_id, $phone, $order->get_total(), $response);
 
             // Mark order as on-hold (waiting for payment confirmation)
-            $order->update_status('on-hold', __('M-Pesa STK Push sent. Awaiting payment confirmation.', 'mpesa-gateway-for-woocommerce'));
+            $order->update_status('on-hold', __('M-Pesa STK Push sent. Awaiting payment confirmation.', 'marupurupu-checkout-for-mpesa'));
 
             // Add order note
             $order->add_order_note(sprintf(
                 /* translators: 1: the M-Pesa merchant request ID, 2: the M-Pesa checkout request ID */
-                __('M-Pesa STK Push initiated. MerchantRequestID: %1$s, CheckoutRequestID: %2$s. Customer should enter M-Pesa PIN on their phone.', 'mpesa-gateway-for-woocommerce'),
+                __('M-Pesa STK Push initiated. MerchantRequestID: %1$s, CheckoutRequestID: %2$s. Customer should enter M-Pesa PIN on their phone.', 'marupurupu-checkout-for-mpesa'),
                 $response['MerchantRequestID'],
                 $response['CheckoutRequestID']
             ));
@@ -295,7 +295,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             );
         } else {
             // Extract error message from response
-            $error_message = __('Unable to initiate M-Pesa payment.', 'mpesa-gateway-for-woocommerce');
+            $error_message = __('Unable to initiate M-Pesa payment.', 'marupurupu-checkout-for-mpesa');
 
             if (isset($response['errorMessage'])) {
                 $error_message = $response['errorMessage'];
@@ -305,7 +305,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
                 $error_message = $response['CustomerMessage'];
             } elseif (isset($response['errorCode'])) {
                 /* translators: %s: the M-Pesa API error code */
-                $error_message = sprintf(__('M-Pesa Error: %s', 'mpesa-gateway-for-woocommerce'), $response['errorCode']);
+                $error_message = sprintf(__('M-Pesa Error: %s', 'marupurupu-checkout-for-mpesa'), $response['errorCode']);
             }
 
             // Log full response for debugging
@@ -316,7 +316,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             wc_add_notice($error_message, 'error');
 
             /* translators: %s: the payment failure reason */
-            $order->add_order_note(sprintf(__('M-Pesa payment failed: %s', 'mpesa-gateway-for-woocommerce'), $error_message));
+            $order->add_order_note(sprintf(__('M-Pesa payment failed: %s', 'marupurupu-checkout-for-mpesa'), $error_message));
 
             return array(
                 'result' => 'fail',
@@ -341,7 +341,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
                 'phone_number' => $phone,
                 'amount' => $amount,
                 'status' => 'pending',
-                'request_data' => json_encode($response),
+                'request_data' => wp_json_encode($response),
             ),
             array('%d', '%s', '%s', '%s', '%f', '%s', '%s')
         );
@@ -416,7 +416,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
                 // error instead.
                 $this->add_error(sprintf(
                     /* translators: %s: settings field name */
-                    __('Could not encrypt the %s field -- the new value was not saved. Check that the OpenSSL PHP extension is enabled on this server.', 'mpesa-gateway-for-woocommerce'),
+                    __('Could not encrypt the %s field -- the new value was not saved. Check that the OpenSSL PHP extension is enabled on this server.', 'marupurupu-checkout-for-mpesa'),
                     $field
                 ));
                 $existing = $this->get_option($field, '');
@@ -450,21 +450,11 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      */
     private function credential_field_description($original_description, $has_saved_value) {
         $note = $has_saved_value
-            ? __('A value is saved (masked above). Click "Change" to replace it.', 'mpesa-gateway-for-woocommerce')
-            : __('No value currently saved.', 'mpesa-gateway-for-woocommerce');
+            ? __('A value is saved (masked above). Click "Change" to replace it.', 'marupurupu-checkout-for-mpesa')
+            : __('No value currently saved.', 'marupurupu-checkout-for-mpesa');
 
         return trim($original_description . ' ' . $note);
     }
-
-    /**
-     * Track whether the one shared <script> for the "Change" button (see
-     * render_masked_credential_row()) has already been printed on this
-     * page load -- there are 5 encrypted fields, each would otherwise print
-     * an identical, redundant copy.
-     *
-     * @var bool
-     */
-    private static $credential_edit_script_printed = false;
 
     /**
      * Build a masked display string for an already-saved credential --
@@ -511,40 +501,26 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
      * masked display text -- the masked text isn't inside the submitted
      * field at all.
      *
+     * Echoes directly, escaping each dynamic value where it's printed --
+     * the control contains an <input> and a <button>, which wp_kses_post()
+     * would strip, so it can't be built as a string and filtered afterwards.
+     * The "Change" click is handled by assets/js/mpesa-admin-credentials.js
+     * (enqueued here, once per page, in the footer).
+     *
      * @param string $field_key
      * @param array  $data       Field data (already wp_parse_args'd by the caller).
      * @param string $decrypted  Decrypted credential, used only to compute the mask.
-     * @return string HTML for the masked/editable control (not the whole <tr>).
+     * @return void Prints the masked/editable control (not the whole <tr>).
      */
     private function render_masked_credential_control($field_key, $data, $decrypted) {
         $masked = $this->mask_credential_for_display($decrypted);
 
-        ob_start();
+        wp_enqueue_script('mpesa-admin-credentials', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-admin-credentials.js', array(), WC_MPESA_TILL_VERSION, true);
         ?>
         <span id="<?php echo esc_attr($field_key); ?>_masked" style="font-family: monospace; letter-spacing: 2px; display: inline-block; padding: 0 4px;"><?php echo esc_html($masked); ?></span>
-        <button type="button" id="<?php echo esc_attr($field_key); ?>_change" class="button button-small" onclick="mpesaEditCredential('<?php echo esc_js($field_key); ?>')"><?php esc_html_e('Change', 'mpesa-gateway-for-woocommerce'); ?></button>
-        <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="display: none; <?php echo esc_attr($data['css']); ?>" value="" placeholder="<?php echo esc_attr__('Enter a new value to replace it', 'mpesa-gateway-for-woocommerce'); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
+        <button type="button" id="<?php echo esc_attr($field_key); ?>_change" class="button button-small mpesa-credential-change" data-field="<?php echo esc_attr($field_key); ?>"><?php esc_html_e('Change', 'marupurupu-checkout-for-mpesa'); ?></button>
+        <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="display: none; <?php echo esc_attr($data['css']); ?>" value="" placeholder="<?php echo esc_attr__('Enter a new value to replace it', 'marupurupu-checkout-for-mpesa'); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
         <?php
-        if (!self::$credential_edit_script_printed) {
-            self::$credential_edit_script_printed = true;
-            ?>
-            <script>
-            function mpesaEditCredential(fieldId) {
-                var masked = document.getElementById(fieldId + '_masked');
-                var changeBtn = document.getElementById(fieldId + '_change');
-                var input = document.getElementById(fieldId);
-                if (masked) { masked.style.display = 'none'; }
-                if (changeBtn) { changeBtn.style.display = 'none'; }
-                if (input) {
-                    input.style.display = '';
-                    input.value = '';
-                    input.focus();
-                }
-            }
-            </script>
-            <?php
-        }
-        return ob_get_clean();
     }
 
     /**
@@ -573,14 +549,14 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         $data = wp_parse_args($data, $defaults);
 
         $value = $this->get_option($key);
-        $masked_control = null;
+        $decrypted_for_mask = null;
 
         if (in_array($key, self::ENCRYPTED_FIELDS, true)) {
             $has_saved_value = $value !== '';
             $data['description'] = $this->credential_field_description($data['description'], $has_saved_value);
 
             if ($has_saved_value) {
-                $masked_control = $this->render_masked_credential_control($field_key, $data, Mpesa_Encryption::decrypt($value));
+                $decrypted_for_mask = Mpesa_Encryption::decrypt($value);
             }
 
             $value = '';
@@ -601,8 +577,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             <td class="forminp">
                 <fieldset>
                     <legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
-                    <?php if ($masked_control !== null): ?>
-                        <?php echo wp_kses_post($masked_control); ?>
+                    <?php if ($decrypted_for_mask !== null): ?>
+                        <?php $this->render_masked_credential_control($field_key, $data, $decrypted_for_mask); ?>
                     <?php else: ?>
                         <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="<?php echo esc_attr($data['css']); ?>" value="<?php echo esc_attr($value); ?>" placeholder="<?php echo esc_attr($data['placeholder']); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
                     <?php endif; ?>
@@ -640,7 +616,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
         $data = wp_parse_args($data, $defaults);
 
         $value = $this->get_option($key);
-        $masked_control = null;
+        $decrypted_for_mask = null;
 
         // A saved credential is never placed into the page as its real
         // value -- see render_masked_credential_control()'s doc comment
@@ -652,7 +628,7 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             $data['description'] = $this->credential_field_description($data['description'], $has_saved_value);
 
             if ($has_saved_value) {
-                $masked_control = $this->render_masked_credential_control($field_key, $data, Mpesa_Encryption::decrypt($value));
+                $decrypted_for_mask = Mpesa_Encryption::decrypt($value);
             }
 
             $value = '';
@@ -667,8 +643,8 @@ class WC_Mpesa_Till_Gateway extends WC_Payment_Gateway {
             <td class="forminp">
                 <fieldset>
                     <legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
-                    <?php if ($masked_control !== null): ?>
-                        <?php echo wp_kses_post($masked_control); ?>
+                    <?php if ($decrypted_for_mask !== null): ?>
+                        <?php $this->render_masked_credential_control($field_key, $data, $decrypted_for_mask); ?>
                     <?php else: ?>
                         <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="<?php echo esc_attr($data['type']); ?>" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="<?php echo esc_attr($data['css']); ?>" value="<?php echo esc_attr($value); ?>" placeholder="<?php echo esc_attr($data['placeholder']); ?>" <?php disabled($data['disabled'], true); ?> <?php echo wp_kses_post($this->get_custom_attribute_html($data)); ?> />
                     <?php endif; ?>

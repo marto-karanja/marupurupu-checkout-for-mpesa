@@ -422,5 +422,5 @@ class Mpesa_Telemetry {
 add_action('plugins_loaded', array('Mpesa_Telemetry', 'init'), 20);
 
 // Track activation/deactivation
-register_activation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'mpesa-gateway-for-woocommerce.php', array('Mpesa_Telemetry', 'track_activation'));
-register_deactivation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'mpesa-gateway-for-woocommerce.php', array('Mpesa_Telemetry', 'track_deactivation'));
+register_activation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Mpesa_Telemetry', 'track_activation'));
+register_deactivation_hook(WC_MPESA_TILL_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Mpesa_Telemetry', 'track_deactivation'));

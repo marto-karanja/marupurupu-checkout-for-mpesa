@@ -226,7 +226,7 @@ class Mpesa_Helpers {
 
         add_meta_box(
             'mpesa_transaction_details',
-            __('M-Pesa Transaction Details', 'mpesa-gateway-for-woocommerce'),
+            __('M-Pesa Transaction Details', 'marupurupu-checkout-for-mpesa'),
             array(__CLASS__, 'render_mpesa_meta_box'),
             $screen,
             'side',
@@ -244,7 +244,7 @@ class Mpesa_Helpers {
             : $post_or_order_object;
 
         if (!$order) {
-            echo '<p>' . esc_html__('Unable to retrieve order.', 'mpesa-gateway-for-woocommerce') . '</p>';
+            echo '<p>' . esc_html__('Unable to retrieve order.', 'marupurupu-checkout-for-mpesa') . '</p>';
             return;
         }
 
@@ -252,40 +252,40 @@ class Mpesa_Helpers {
         $transaction = self::get_transaction_by_order_id($order_id);
 
         if (!$transaction) {
-            echo '<p>' . esc_html__('No M-Pesa transaction found for this order.', 'mpesa-gateway-for-woocommerce') . '</p>';
+            echo '<p>' . esc_html__('No M-Pesa transaction found for this order.', 'marupurupu-checkout-for-mpesa') . '</p>';
             return;
         }
 
         echo '<div class="mpesa-transaction-details">';
-        echo '<p><strong>' . esc_html__('Status:', 'mpesa-gateway-for-woocommerce') . '</strong> <span class="mpesa-status-' . esc_attr($transaction->status) . '">' . esc_html(ucfirst($transaction->status)) . '</span></p>';
+        echo '<p><strong>' . esc_html__('Status:', 'marupurupu-checkout-for-mpesa') . '</strong> <span class="mpesa-status-' . esc_attr($transaction->status) . '">' . esc_html(ucfirst($transaction->status)) . '</span></p>';
 
         if ($transaction->transaction_id) {
-            echo '<p><strong>' . esc_html__('M-Pesa Receipt:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->transaction_id) . '</p>';
+            echo '<p><strong>' . esc_html__('M-Pesa Receipt:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html($transaction->transaction_id) . '</p>';
         }
 
-        echo '<p><strong>' . esc_html__('Phone Number:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->phone_number) . '</p>';
-        echo '<p><strong>' . esc_html__('Amount:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html(self::format_amount($transaction->amount)) . '</p>';
+        echo '<p><strong>' . esc_html__('Phone Number:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html($transaction->phone_number) . '</p>';
+        echo '<p><strong>' . esc_html__('Amount:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html(self::format_amount($transaction->amount)) . '</p>';
 
         if ($transaction->result_desc) {
-            echo '<p><strong>' . esc_html__('Result:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->result_desc) . '</p>';
+            echo '<p><strong>' . esc_html__('Result:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html($transaction->result_desc) . '</p>';
         }
 
-        echo '<p><strong>' . esc_html__('Created:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->created_at) . '</p>';
+        echo '<p><strong>' . esc_html__('Created:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html($transaction->created_at) . '</p>';
 
         if ($transaction->updated_at != $transaction->created_at) {
-            echo '<p><strong>' . esc_html__('Updated:', 'mpesa-gateway-for-woocommerce') . '</strong> ' . esc_html($transaction->updated_at) . '</p>';
+            echo '<p><strong>' . esc_html__('Updated:', 'marupurupu-checkout-for-mpesa') . '</strong> ' . esc_html($transaction->updated_at) . '</p>';
         }
 
         // Manual confirmation section for pending/failed transactions
         if (in_array($transaction->status, array('pending', 'failed')) && $order->get_status() !== 'processing') {
             echo '<hr>';
-            echo '<h4>' . esc_html__('Manual Payment Confirmation', 'mpesa-gateway-for-woocommerce') . '</h4>';
-            echo '<p class="description">' . esc_html__('If payment was successful but not automatically confirmed, enter the M-Pesa receipt number below:', 'mpesa-gateway-for-woocommerce') . '</p>';
+            echo '<h4>' . esc_html__('Manual Payment Confirmation', 'marupurupu-checkout-for-mpesa') . '</h4>';
+            echo '<p class="description">' . esc_html__('If payment was successful but not automatically confirmed, enter the M-Pesa receipt number below:', 'marupurupu-checkout-for-mpesa') . '</p>';
             echo '<form method="post" action="">';
             echo '<input type="hidden" name="mpesa_manual_confirm_nonce" value="' . esc_attr(wp_create_nonce('mpesa_manual_confirm_' . $order_id)) . '">';
             echo '<input type="hidden" name="order_id" value="' . esc_attr($order_id) . '">';
-            echo '<p><input type="text" name="mpesa_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'mpesa-gateway-for-woocommerce') . '" style="width: 100%;" required></p>';
-            echo '<p><button type="submit" name="mpesa_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'mpesa-gateway-for-woocommerce') . '</button></p>';
+            echo '<p><input type="text" name="mpesa_receipt_number" placeholder="' . esc_attr__('M-Pesa Receipt Number (e.g. QA12BC3DEF)', 'marupurupu-checkout-for-mpesa') . '" style="width: 100%;" required></p>';
+            echo '<p><button type="submit" name="mpesa_manual_confirm" class="button button-primary">' . esc_html__('Confirm Payment', 'marupurupu-checkout-for-mpesa') . '</button></p>';
             echo '</form>';
         }
 
@@ -304,9 +304,9 @@ class Mpesa_Helpers {
         $receipt_number = sanitize_text_field(wp_unslash($_POST['mpesa_receipt_number']));
 
         // Verify nonce
-        if (!wp_verify_nonce(wp_unslash($_POST['mpesa_manual_confirm_nonce']), 'mpesa_manual_confirm_' . $order_id)) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['mpesa_manual_confirm_nonce'])), 'mpesa_manual_confirm_' . $order_id)) {
             add_action('admin_notices', function() {
-                echo '<div class="error"><p>' . esc_html__('Security check failed.', 'mpesa-gateway-for-woocommerce') . '</p></div>';
+                echo '<div class="error"><p>' . esc_html__('Security check failed.', 'marupurupu-checkout-for-mpesa') . '</p></div>';
             });
             return;
         }
@@ -314,7 +314,7 @@ class Mpesa_Helpers {
         // Check permissions
         if (!current_user_can('edit_shop_orders')) {
             add_action('admin_notices', function() {
-                echo '<div class="error"><p>' . esc_html__('You do not have permission to perform this action.', 'mpesa-gateway-for-woocommerce') . '</p></div>';
+                echo '<div class="error"><p>' . esc_html__('You do not have permission to perform this action.', 'marupurupu-checkout-for-mpesa') . '</p></div>';
             });
             return;
         }
@@ -346,21 +346,21 @@ class Mpesa_Helpers {
         $order->payment_complete($receipt_number);
         $order->update_status('processing', sprintf(
             /* translators: 1: the admin's display name, 2: the M-Pesa receipt number */
-            __('Payment manually confirmed by %1$s. M-Pesa Receipt: %2$s', 'mpesa-gateway-for-woocommerce'),
+            __('Payment manually confirmed by %1$s. M-Pesa Receipt: %2$s', 'marupurupu-checkout-for-mpesa'),
             wp_get_current_user()->display_name,
             $receipt_number
         ));
 
         $order->add_order_note(sprintf(
             /* translators: 1: the M-Pesa receipt number, 2: the admin's display name */
-            __('Payment manually verified and confirmed. Receipt Number: %1$s, Confirmed by: %2$s', 'mpesa-gateway-for-woocommerce'),
+            __('Payment manually verified and confirmed. Receipt Number: %1$s, Confirmed by: %2$s', 'marupurupu-checkout-for-mpesa'),
             $receipt_number,
             wp_get_current_user()->display_name
         ));
 
         add_action('admin_notices', function() use ($receipt_number) {
             /* translators: %s: the M-Pesa receipt number */
-            echo '<div class="updated"><p>' . esc_html(sprintf(__('Payment confirmed successfully. Receipt: %s', 'mpesa-gateway-for-woocommerce'), $receipt_number)) . '</p></div>';
+            echo '<div class="updated"><p>' . esc_html(sprintf(__('Payment confirmed successfully. Receipt: %s', 'marupurupu-checkout-for-mpesa'), $receipt_number)) . '</p></div>';
         });
     }
 }
@@ -371,9 +371,11 @@ add_action('add_meta_boxes', array('Mpesa_Helpers', 'add_mpesa_meta_box'));
 // Handle manual payment confirmation
 add_action('admin_init', array('Mpesa_Helpers', 'handle_manual_confirmation'));
 
-// Schedule log cleanup (runs daily)
-if (!wp_next_scheduled('mpesa_clean_old_logs')) {
-    wp_schedule_event(time(), 'daily', 'mpesa_clean_old_logs');
+// Older versions scheduled a daily 'mpesa_clean_old_logs' event for a
+// Mpesa_Helpers::clean_old_logs() method that has since been removed (the
+// plugin now logs through WooCommerce's own logger). Sites that ran one of
+// those versions still have the event scheduled, and firing it would call a
+// method that no longer exists -- so unschedule it if it's still there.
+if (wp_next_scheduled('mpesa_clean_old_logs')) {
+    wp_clear_scheduled_hook('mpesa_clean_old_logs');
 }
-
-add_action('mpesa_clean_old_logs', array('Mpesa_Helpers', 'clean_old_logs'));

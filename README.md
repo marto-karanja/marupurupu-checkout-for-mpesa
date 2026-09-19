@@ -1,8 +1,10 @@
-# M-Pesa Gateway for WooCommerce
+# Marupurupu Checkout for M-Pesa and WooCommerce
 
 Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. Supports both classic shortcode-based checkout and modern block-based checkout.
 
-- **Stable version:** 1.5.0
+> **Independent plugin — no affiliation.** This plugin is not affiliated with, endorsed by, or sponsored by Safaricom, M-Pesa, WooCommerce or Automattic. Those names are trademarks of their respective owners and are used only to describe what the plugin works with. "Marupurupu" is a Swahili word meaning "allowances".
+
+- **Stable version:** 1.5.5
 - **Requires:** WordPress 5.3+, WooCommerce 3.0+ (5.5+ for block checkout), PHP 7.4+
 - **License:** [GPLv2 or later](LICENSE)
 
@@ -26,7 +28,7 @@ Accept M-Pesa Till payments via STK Push (Safaricom Daraja API) in WooCommerce. 
 
 ## Installation
 
-1. Download the latest release, or clone this repo, into `wp-content/plugins/mpesa-gateway-for-woocommerce/`
+1. Download the latest release, or clone this repo, into `wp-content/plugins/marupurupu-checkout-for-mpesa/`
 2. Activate the plugin from the WordPress **Plugins** menu
 3. Go to **WooCommerce > Settings > Payments** and enable "M-Pesa Till Payment"
 4. Click **Manage** and enter your Business Short Code (Till Number), Consumer Key, Consumer Secret, and Passkey from the [Safaricom Daraja Portal](https://developer.safaricom.co.ke/)
@@ -39,7 +41,7 @@ See `readme.txt` for the full WordPress.org-formatted documentation, FAQ, and ch
 
 | File | Responsibility |
 |---|---|
-| `mpesa-gateway-for-woocommerce.php` | Plugin entry point — registers the gateway and WooCommerce Blocks support |
+| `marupurupu-checkout-for-mpesa.php` | Plugin entry point — registers the gateway and WooCommerce Blocks support |
 | `includes/class-wc-mpesa-till-gateway.php` | `WC_Payment_Gateway` subclass — checkout fields, `process_payment()`, settings form |
 | `includes/class-mpesa-api.php` | Daraja API client — OAuth token, STK Push, status query |
 | `includes/class-mpesa-callback.php` | Handles the Safaricom → site payment webhook |

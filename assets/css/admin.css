@@ -1,0 +1,50 @@
+/**
+ * M-Pesa Transactions admin page styles.
+ */
+.mpesa-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+.mpesa-stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+}
+.mpesa-stat-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    color: #2271b1;
+}
+.mpesa-stat-card p {
+    margin: 0;
+    color: #646970;
+}
+.mpesa-stat-success h3 { color: #00a32a; }
+.mpesa-stat-pending h3 { color: #dba617; }
+.mpesa-stat-failed h3 { color: #d63638; }
+.mpesa-stat-amount h3 { color: #2271b1; }
+
+.mpesa-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.mpesa-status-completed {
+    background: #e6f4ea;
+    color: #1e8e3e;
+}
+.mpesa-status-pending {
+    background: #fef7e0;
+    color: #9c6f19;
+}
+.mpesa-status-failed {
+    background: #fce8e6;
+    color: #d93025;
+}

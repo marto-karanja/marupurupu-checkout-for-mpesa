@@ -22,6 +22,7 @@
             }
 
             this.bindEvents();
+            this.scheduleRetrySection();
 
             // Don't start checking if payment is already successful
             if ($('#mpesa-status-success').is(':visible')) {
@@ -39,6 +40,26 @@
             if ($('#mpesa-status-pending').length > 0) {
                 this.startStatusCheck();
             }
+        },
+
+        /**
+         * Reveal the retry options after 2 minutes, if the payment is still
+         * pending by then (the section only exists in the pending state).
+         * Checking visibility first means a payment that succeeds before the
+         * 2 minutes are up doesn't get its retry form un-hidden afterwards.
+         */
+        scheduleRetrySection: function() {
+            var $retrySection = $('#mpesa-retry-section');
+
+            if (!$retrySection.length) {
+                return;
+            }
+
+            setTimeout(function() {
+                if ($('#mpesa-status-pending').is(':visible')) {
+                    $retrySection.show();
+                }
+            }, 120000);
         },
 
         bindEvents: function() {

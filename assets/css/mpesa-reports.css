@@ -1,0 +1,87 @@
+/**
+ * M-Pesa Reports admin page styles.
+ */
+.mpesa-reports-filters {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+.mpesa-reports-filters form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.mpesa-reports-filters label {
+    font-weight: 600;
+}
+.mpesa-reports-filters input[type="date"] {
+    padding: 5px;
+}
+
+.mpesa-reports-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+.mpesa-report-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.mpesa-report-card .card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.mpesa-report-card .card-icon .dashicons {
+    color: #fff;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+}
+.mpesa-report-card .card-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 28px;
+    color: #1d2327;
+}
+.mpesa-report-card .card-content p {
+    margin: 0;
+    color: #646970;
+    font-size: 14px;
+}
+
+.mpesa-reports-charts {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+.chart-container {
+    padding: 10px;
+}
+.chart-container h2 {
+    margin-top: 0;
+}
+
+.mpesa-reports-table {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+}
+.mpesa-reports-table h2 {
+    margin-top: 0;
+}

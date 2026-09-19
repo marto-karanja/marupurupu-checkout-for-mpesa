@@ -39,13 +39,22 @@ class Mpesa_Callback {
         $callback_json = file_get_contents('php://input');
         $callback_data = json_decode($callback_json, true);
 
-        // Log callback data
-        $this->log_callback($callback_data);
-
-        if (!$callback_data) {
+        if (!is_array($callback_data)) {
+            $this->log_message('Rejected callback with a missing or invalid JSON body.');
             $this->send_response(array('ResultCode' => 1, 'ResultDesc' => 'Invalid callback data'));
             return;
         }
+
+        // json_decode() only parses -- it doesn't clean anything. Sanitize
+        // every string in the payload once, here, before any of it is
+        // logged, stored in the transactions table, or put in an order note.
+        // (Numbers and booleans pass through untouched.)
+        $callback_data = map_deep($callback_data, function ($value) {
+            return is_string($value) ? sanitize_text_field($value) : $value;
+        });
+
+        // Log callback data
+        $this->log_callback($callback_data);
 
         // Extract callback information
         if (isset($callback_data['Body']['stkCallback'])) {
@@ -69,7 +78,8 @@ class Mpesa_Callback {
             return false;
         }
 
-        $provided = isset($_GET['key']) ? (string) wp_unslash($_GET['key']) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Safaricom's server-to-server webhook can't hold a WP nonce; the secret token compared below is its authentication.
+        $provided = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
 
         return hash_equals($this->expected_secret, $provided);
     }
@@ -136,19 +146,24 @@ class Mpesa_Callback {
             $phone = '';
             $transaction_date = '';
 
-            // Extract metadata
-            foreach ($callback_metadata as $item) {
+            // Extract metadata (already sanitized in process_callback(); the
+            // isset() checks just keep a malformed item from raising notices)
+            foreach ((array) $callback_metadata as $item) {
+                if (!is_array($item) || !isset($item['Name'], $item['Value'])) {
+                    continue;
+                }
+
                 if ($item['Name'] == 'MpesaReceiptNumber') {
-                    $transaction_id = $item['Value'];
+                    $transaction_id = (string) $item['Value'];
                 }
                 if ($item['Name'] == 'Amount') {
-                    $amount = $item['Value'];
+                    $amount = (float) $item['Value'];
                 }
                 if ($item['Name'] == 'PhoneNumber') {
-                    $phone = $item['Value'];
+                    $phone = (string) $item['Value'];
                 }
                 if ($item['Name'] == 'TransactionDate') {
-                    $transaction_date = $item['Value'];
+                    $transaction_date = (string) $item['Value'];
                 }
             }
 
@@ -168,7 +183,7 @@ class Mpesa_Callback {
                         'result_code' => $result_code,
                         'result_desc' => 'Amount mismatch: expected ' . $expected_amount . ', received ' . $amount,
                         'status' => 'failed',
-                        'response_data' => json_encode($stk_callback),
+                        'response_data' => wp_json_encode($stk_callback),
                     ),
                     array('checkout_request_id' => $checkout_request_id),
                     array('%s', '%s', '%s', '%s', '%s'),
@@ -177,7 +192,7 @@ class Mpesa_Callback {
 
                 $order->update_status('on-hold', sprintf(
                     /* translators: 1: amount reported by M-Pesa, 2: the order total, 3: the M-Pesa receipt number */
-                    __('M-Pesa reported a paid amount (KES %1$s) that does not match the order total (KES %2$s). NOT marked as paid automatically -- verify manually before fulfilling. Receipt: %3$s', 'mpesa-gateway-for-woocommerce'),
+                    __('M-Pesa reported a paid amount (KES %1$s) that does not match the order total (KES %2$s). NOT marked as paid automatically -- verify manually before fulfilling. Receipt: %3$s', 'marupurupu-checkout-for-mpesa'),
                     number_format((float) $amount, 2),
                     number_format($expected_amount, 2),
                     $transaction_id
@@ -201,7 +216,7 @@ class Mpesa_Callback {
                     'result_code' => $result_code,
                     'result_desc' => $result_desc,
                     'status' => 'completed',
-                    'response_data' => json_encode($stk_callback),
+                    'response_data' => wp_json_encode($stk_callback),
                 ),
                 array('checkout_request_id' => $checkout_request_id),
                 array('%s', '%s', '%s', '%s', '%s'),
@@ -212,7 +227,7 @@ class Mpesa_Callback {
             $order->payment_complete($transaction_id);
             $order->update_status('processing', sprintf(
                 /* translators: 1: the M-Pesa receipt number, 2: the amount paid, 3: the customer phone number */
-                __('M-Pesa payment received and confirmed. Transaction ID: %1$s, Amount: KES %2$s, Phone: %3$s', 'mpesa-gateway-for-woocommerce'),
+                __('M-Pesa payment received and confirmed. Transaction ID: %1$s, Amount: KES %2$s, Phone: %3$s', 'marupurupu-checkout-for-mpesa'),
                 $transaction_id,
                 number_format($amount, 2),
                 $phone
@@ -220,7 +235,7 @@ class Mpesa_Callback {
 
             $order->add_order_note(sprintf(
                 /* translators: 1: the M-Pesa receipt number, 2: the amount paid, 3: the M-Pesa transaction date */
-                __('Payment confirmed via M-Pesa callback. Receipt: %1$s, Amount: KES %2$s, Date: %3$s', 'mpesa-gateway-for-woocommerce'),
+                __('Payment confirmed via M-Pesa callback. Receipt: %1$s, Amount: KES %2$s, Date: %3$s', 'marupurupu-checkout-for-mpesa'),
                 $transaction_id,
                 number_format($amount, 2),
                 $transaction_date
@@ -256,7 +271,7 @@ class Mpesa_Callback {
                     'result_code' => $result_code,
                     'result_desc' => $result_desc,
                     'status' => 'failed',
-                    'response_data' => json_encode($stk_callback),
+                    'response_data' => wp_json_encode($stk_callback),
                 ),
                 array('checkout_request_id' => $checkout_request_id),
                 array('%s', '%s', '%s', '%s'),
@@ -265,7 +280,7 @@ class Mpesa_Callback {
 
             $order->update_status('failed', sprintf(
                 /* translators: %s: the failure reason reported by M-Pesa */
-                __('M-Pesa payment failed: %s', 'mpesa-gateway-for-woocommerce'),
+                __('M-Pesa payment failed: %s', 'marupurupu-checkout-for-mpesa'),
                 $result_desc
             ));
 
@@ -278,7 +293,7 @@ class Mpesa_Callback {
      */
     private function send_response($response) {
         header('Content-Type: application/json');
-        echo json_encode($response);
+        echo wp_json_encode($response);
         exit;
     }
 

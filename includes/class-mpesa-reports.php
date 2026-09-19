@@ -22,8 +22,8 @@ class Mpesa_Reports {
      */
     public static function add_menu_page() {
         add_menu_page(
-            __('M-Pesa Payments', 'mpesa-gateway-for-woocommerce'),
-            __('M-Pesa Payments', 'mpesa-gateway-for-woocommerce'),
+            __('M-Pesa Payments', 'marupurupu-checkout-for-mpesa'),
+            __('M-Pesa Payments', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
             'mpesa-payments',
             array(__CLASS__, 'render_reports_page'),
@@ -34,8 +34,8 @@ class Mpesa_Reports {
         // Add submenu pages
         add_submenu_page(
             'mpesa-payments',
-            __('Reports', 'mpesa-gateway-for-woocommerce'),
-            __('Reports', 'mpesa-gateway-for-woocommerce'),
+            __('Reports', 'marupurupu-checkout-for-mpesa'),
+            __('Reports', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
             'mpesa-payments',
             array(__CLASS__, 'render_reports_page')
@@ -43,8 +43,8 @@ class Mpesa_Reports {
 
         add_submenu_page(
             'mpesa-payments',
-            __('Transactions', 'mpesa-gateway-for-woocommerce'),
-            __('Transactions', 'mpesa-gateway-for-woocommerce'),
+            __('Transactions', 'marupurupu-checkout-for-mpesa'),
+            __('Transactions', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
             'mpesa-transactions',
             array('Mpesa_Admin_Page', 'render_page')
@@ -52,8 +52,8 @@ class Mpesa_Reports {
 
         add_submenu_page(
             'mpesa-payments',
-            __('Settings', 'mpesa-gateway-for-woocommerce'),
-            __('Settings', 'mpesa-gateway-for-woocommerce'),
+            __('Settings', 'marupurupu-checkout-for-mpesa'),
+            __('Settings', 'marupurupu-checkout-for-mpesa'),
             'manage_woocommerce',
             'admin.php?page=wc-settings&tab=checkout&section=mpesa_till'
         );
@@ -67,38 +67,84 @@ class Mpesa_Reports {
             return;
         }
 
+        wp_enqueue_style('mpesa-reports', WC_MPESA_TILL_PLUGIN_URL . 'assets/css/mpesa-reports.css', array(), WC_MPESA_TILL_VERSION);
+
         // Chart.js bundled locally (not loaded from a CDN) so the plugin
         // never depends on an external host being reachable/trustworthy.
-        wp_enqueue_script('chart-js', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/chart.min.js', array(), '3.9.1', true);
+        // Source: https://github.com/chartjs/Chart.js (MIT), see readme.txt.
+        wp_enqueue_script('chart-js', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/chart.umd.js', array(), '4.5.1', true);
+        wp_enqueue_script('mpesa-reports', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-reports.js', array('jquery', 'chart-js'), WC_MPESA_TILL_VERSION, true);
+
+        // Chart data is computed here (not while rendering the page) so it
+        // can be handed to the script through wp_localize_script(), which
+        // JSON-encodes it safely, instead of echoing JSON into a <script> tag.
+        list($date_from, $date_to) = self::get_date_range();
+
+        $daily_data = self::get_daily_data($date_from, $date_to);
+        $status_breakdown = self::get_status_breakdown($date_from, $date_to);
+
+        wp_localize_script('mpesa-reports', 'mpesaReportsData', array(
+            'daily' => array(
+                'labels' => array_column($daily_data, 'date'),
+                'revenue' => array_column($daily_data, 'revenue'),
+                'count' => array_column($daily_data, 'count'),
+            ),
+            'status' => array(
+                $status_breakdown ? (int) $status_breakdown->completed : 0,
+                $status_breakdown ? (int) $status_breakdown->pending : 0,
+                $status_breakdown ? (int) $status_breakdown->failed : 0,
+            ),
+            'i18n' => array(
+                'revenue' => __('Revenue', 'marupurupu-checkout-for-mpesa'),
+                'revenueKes' => __('Revenue (KES)', 'marupurupu-checkout-for-mpesa'),
+                'transactions' => __('Transactions', 'marupurupu-checkout-for-mpesa'),
+                'completed' => __('Completed', 'marupurupu-checkout-for-mpesa'),
+                'pending' => __('Pending', 'marupurupu-checkout-for-mpesa'),
+                'failed' => __('Failed', 'marupurupu-checkout-for-mpesa'),
+            ),
+        ));
+    }
+
+    /**
+     * Read the report's date range from the query string (read-only filter,
+     * no state change), falling back to "this month so far" if either value
+     * is missing or not a YYYY-MM-DD date.
+     *
+     * @return array [date_from, date_to]
+     */
+    private static function get_date_range() {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only report filter, no state change.
+        $date_from = isset($_GET['date_from']) ? sanitize_text_field(wp_unslash($_GET['date_from'])) : '';
+        $date_to = isset($_GET['date_to']) ? sanitize_text_field(wp_unslash($_GET['date_to'])) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_from)) {
+            $date_from = gmdate('Y-m-01');
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_to)) {
+            $date_to = gmdate('Y-m-d');
+        }
+
+        return array($date_from, $date_to);
     }
 
     /**
      * Render reports page
      */
     public static function render_reports_page() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mpesa_till_transactions';
-
-        // Get date range from query params
-        $date_from = isset($_GET['date_from']) ? sanitize_text_field(wp_unslash($_GET['date_from'])) : gmdate('Y-m-01');
-        $date_to = isset($_GET['date_to']) ? sanitize_text_field(wp_unslash($_GET['date_to'])) : gmdate('Y-m-d');
+        list($date_from, $date_to) = self::get_date_range();
 
         // Get overall statistics
         $stats = self::get_statistics($date_from, $date_to);
 
-        // Get daily data for charts
-        $daily_data = self::get_daily_data($date_from, $date_to);
-
         // Get top customers
         $top_customers = self::get_top_customers($date_from, $date_to, 10);
-
-        // Get payment method breakdown
-        $status_breakdown = self::get_status_breakdown($date_from, $date_to);
 
         ?>
         <div class="wrap">
             <h1 class="wp-heading-inline">
-                <?php esc_html_e('M-Pesa Payment Reports', 'mpesa-gateway-for-woocommerce'); ?>
+                <?php esc_html_e('M-Pesa Payment Reports', 'marupurupu-checkout-for-mpesa'); ?>
             </h1>
             <hr class="wp-header-end">
 
@@ -107,18 +153,18 @@ class Mpesa_Reports {
                 <form method="get" action="">
                     <input type="hidden" name="page" value="mpesa-payments">
 
-                    <label for="date_from"><?php esc_html_e('From:', 'mpesa-gateway-for-woocommerce'); ?></label>
+                    <label for="date_from"><?php esc_html_e('From:', 'marupurupu-checkout-for-mpesa'); ?></label>
                     <input type="date" name="date_from" id="date_from" value="<?php echo esc_attr($date_from); ?>">
 
-                    <label for="date_to"><?php esc_html_e('To:', 'mpesa-gateway-for-woocommerce'); ?></label>
+                    <label for="date_to"><?php esc_html_e('To:', 'marupurupu-checkout-for-mpesa'); ?></label>
                     <input type="date" name="date_to" id="date_to" value="<?php echo esc_attr($date_to); ?>">
 
-                    <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'mpesa-gateway-for-woocommerce'); ?>">
+                    <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
 
-                    <a href="?page=mpesa-payments" class="button"><?php esc_html_e('Reset', 'mpesa-gateway-for-woocommerce'); ?></a>
+                    <a href="?page=mpesa-payments" class="button"><?php esc_html_e('Reset', 'marupurupu-checkout-for-mpesa'); ?></a>
 
                     <a href="<?php echo esc_url(self::get_export_url($date_from, $date_to)); ?>" class="button" style="float: right;">
-                        <?php esc_html_e('Export Report (CSV)', 'mpesa-gateway-for-woocommerce'); ?>
+                        <?php esc_html_e('Export Report (CSV)', 'marupurupu-checkout-for-mpesa'); ?>
                     </a>
                 </form>
             </div>
@@ -130,8 +176,8 @@ class Mpesa_Reports {
                         <span class="dashicons dashicons-money-alt"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo wc_price($stats->total_revenue); ?></h3>
-                        <p><?php esc_html_e('Total Revenue', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <h3><?php echo wp_kses_post(wc_price($stats->total_revenue)); ?></h3>
+                        <p><?php esc_html_e('Total Revenue', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
 
@@ -141,7 +187,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->completed); ?></h3>
-                        <p><?php esc_html_e('Successful Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <p><?php esc_html_e('Successful Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
 
@@ -151,7 +197,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->pending); ?></h3>
-                        <p><?php esc_html_e('Pending Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <p><?php esc_html_e('Pending Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
 
@@ -161,7 +207,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->failed); ?></h3>
-                        <p><?php esc_html_e('Failed Payments', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <p><?php esc_html_e('Failed Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
 
@@ -171,7 +217,7 @@ class Mpesa_Reports {
                     </div>
                     <div class="card-content">
                         <h3><?php echo number_format($stats->total, 0); ?></h3>
-                        <p><?php esc_html_e('Total Transactions', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <p><?php esc_html_e('Total Transactions', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
 
@@ -180,8 +226,8 @@ class Mpesa_Reports {
                         <span class="dashicons dashicons-chart-line"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo wc_price($stats->avg_transaction); ?></h3>
-                        <p><?php esc_html_e('Average Transaction', 'mpesa-gateway-for-woocommerce'); ?></p>
+                        <h3><?php echo wp_kses_post(wc_price($stats->avg_transaction)); ?></h3>
+                        <p><?php esc_html_e('Average Transaction', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
             </div>
@@ -189,27 +235,27 @@ class Mpesa_Reports {
             <!-- Charts Section -->
             <div class="mpesa-reports-charts">
                 <div class="chart-container" style="width: 48%; display: inline-block; vertical-align: top;">
-                    <h2><?php esc_html_e('Daily Revenue', 'mpesa-gateway-for-woocommerce'); ?></h2>
+                    <h2><?php esc_html_e('Daily Revenue', 'marupurupu-checkout-for-mpesa'); ?></h2>
                     <canvas id="revenueChart"></canvas>
                 </div>
 
                 <div class="chart-container" style="width: 48%; display: inline-block; vertical-align: top; margin-left: 3%;">
-                    <h2><?php esc_html_e('Payment Status Distribution', 'mpesa-gateway-for-woocommerce'); ?></h2>
+                    <h2><?php esc_html_e('Payment Status Distribution', 'marupurupu-checkout-for-mpesa'); ?></h2>
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
 
             <!-- Top Customers Table -->
             <div class="mpesa-reports-table">
-                <h2><?php esc_html_e('Top Customers', 'mpesa-gateway-for-woocommerce'); ?></h2>
+                <h2><?php esc_html_e('Top Customers', 'marupurupu-checkout-for-mpesa'); ?></h2>
                 <table class="wp-list-table widefat fixed striped">
                     <thead>
                         <tr>
-                            <th><?php esc_html_e('Rank', 'mpesa-gateway-for-woocommerce'); ?></th>
-                            <th><?php esc_html_e('Phone Number', 'mpesa-gateway-for-woocommerce'); ?></th>
-                            <th><?php esc_html_e('Total Transactions', 'mpesa-gateway-for-woocommerce'); ?></th>
-                            <th><?php esc_html_e('Total Amount', 'mpesa-gateway-for-woocommerce'); ?></th>
-                            <th><?php esc_html_e('Success Rate', 'mpesa-gateway-for-woocommerce'); ?></th>
+                            <th><?php esc_html_e('Rank', 'marupurupu-checkout-for-mpesa'); ?></th>
+                            <th><?php esc_html_e('Phone Number', 'marupurupu-checkout-for-mpesa'); ?></th>
+                            <th><?php esc_html_e('Total Transactions', 'marupurupu-checkout-for-mpesa'); ?></th>
+                            <th><?php esc_html_e('Total Amount', 'marupurupu-checkout-for-mpesa'); ?></th>
+                            <th><?php esc_html_e('Success Rate', 'marupurupu-checkout-for-mpesa'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -219,7 +265,7 @@ class Mpesa_Reports {
                                     <td><?php echo absint($rank++); ?></td>
                                     <td><?php echo esc_html($customer->phone_number); ?></td>
                                     <td><?php echo number_format($customer->total_transactions); ?></td>
-                                    <td><?php echo wc_price($customer->total_amount); ?></td>
+                                    <td><?php echo wp_kses_post(wc_price($customer->total_amount)); ?></td>
                                     <td>
                                         <?php
                                         $success_rate = ($customer->completed / $customer->total_transactions) * 100;
@@ -231,7 +277,7 @@ class Mpesa_Reports {
                         <?php else: ?>
                             <tr>
                                 <td colspan="5" style="text-align: center;">
-                                    <?php esc_html_e('No data available for selected period.', 'mpesa-gateway-for-woocommerce'); ?>
+                                    <?php esc_html_e('No data available for selected period.', 'marupurupu-checkout-for-mpesa'); ?>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -239,181 +285,6 @@ class Mpesa_Reports {
                 </table>
             </div>
         </div>
-
-        <!-- Chart.js Data -->
-        <script>
-        jQuery(document).ready(function($) {
-            // Daily Revenue Chart
-            var revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            var revenueChart = new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: <?php echo json_encode(array_column($daily_data, 'date')); ?>,
-                    datasets: [{
-                        label: '<?php esc_html_e('Revenue', 'mpesa-gateway-for-woocommerce'); ?>',
-                        data: <?php echo json_encode(array_column($daily_data, 'revenue')); ?>,
-                        borderColor: '#0f834d',
-                        backgroundColor: 'rgba(15, 131, 77, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: '<?php esc_html_e('Transactions', 'mpesa-gateway-for-woocommerce'); ?>',
-                        data: <?php echo json_encode(array_column($daily_data, 'count')); ?>,
-                        borderColor: '#2271b1',
-                        backgroundColor: 'rgba(34, 113, 177, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: '<?php esc_html_e('Revenue (KES)', 'mpesa-gateway-for-woocommerce'); ?>'
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: '<?php esc_html_e('Transactions', 'mpesa-gateway-for-woocommerce'); ?>'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Status Distribution Chart
-            var statusCtx = document.getElementById('statusChart').getContext('2d');
-            var statusChart = new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['<?php esc_html_e('Completed', 'mpesa-gateway-for-woocommerce'); ?>', '<?php esc_html_e('Pending', 'mpesa-gateway-for-woocommerce'); ?>', '<?php esc_html_e('Failed', 'mpesa-gateway-for-woocommerce'); ?>'],
-                    datasets: [{
-                        data: [
-                            <?php echo (int) $status_breakdown->completed; ?>,
-                            <?php echo (int) $status_breakdown->pending; ?>,
-                            <?php echo (int) $status_breakdown->failed; ?>
-                        ],
-                        backgroundColor: ['#0f834d', '#dba617', '#d63638'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        });
-        </script>
-
-        <style>
-            .mpesa-reports-filters {
-                background: #fff;
-                padding: 20px;
-                margin: 20px 0;
-                border: 1px solid #ccd0d4;
-                border-radius: 4px;
-            }
-            .mpesa-reports-filters form {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .mpesa-reports-filters label {
-                font-weight: 600;
-            }
-            .mpesa-reports-filters input[type="date"] {
-                padding: 5px;
-            }
-
-            .mpesa-reports-summary {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin: 20px 0;
-            }
-            .mpesa-report-card {
-                background: #fff;
-                border: 1px solid #ccd0d4;
-                border-radius: 4px;
-                padding: 20px;
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-            .mpesa-report-card .card-icon {
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .mpesa-report-card .card-icon .dashicons {
-                color: #fff;
-                font-size: 30px;
-                width: 30px;
-                height: 30px;
-            }
-            .mpesa-report-card .card-content h3 {
-                margin: 0 0 5px 0;
-                font-size: 28px;
-                color: #1d2327;
-            }
-            .mpesa-report-card .card-content p {
-                margin: 0;
-                color: #646970;
-                font-size: 14px;
-            }
-
-            .mpesa-reports-charts {
-                background: #fff;
-                padding: 20px;
-                margin: 20px 0;
-                border: 1px solid #ccd0d4;
-                border-radius: 4px;
-            }
-            .chart-container {
-                padding: 10px;
-            }
-            .chart-container h2 {
-                margin-top: 0;
-            }
-
-            .mpesa-reports-table {
-                background: #fff;
-                padding: 20px;
-                margin: 20px 0;
-                border: 1px solid #ccd0d4;
-                border-radius: 4px;
-            }
-            .mpesa-reports-table h2 {
-                margin-top: 0;
-            }
-        </style>
         <?php
     }
 
@@ -527,7 +398,7 @@ add_action('admin_post_mpesa_export_report', function() {
     check_admin_referer('mpesa_export_report', 'nonce');
 
     if (!current_user_can('manage_woocommerce')) {
-        wp_die(__('You do not have permission to perform this action.', 'mpesa-gateway-for-woocommerce'));
+        wp_die(esc_html__('You do not have permission to perform this action.', 'marupurupu-checkout-for-mpesa'));
     }
 
     $date_from = isset($_GET['date_from']) ? sanitize_text_field(wp_unslash($_GET['date_from'])) : gmdate('Y-m-01');
@@ -573,6 +444,7 @@ add_action('admin_post_mpesa_export_report', function() {
         ));
     }
 
-    fclose($output);
+    // php://output is a stream wrapper, not a filesystem handle; WP_Filesystem has no equivalent.
+    fclose($output); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
     exit;
 });

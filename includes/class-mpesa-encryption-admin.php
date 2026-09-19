@@ -72,7 +72,7 @@ class Mpesa_Encryption_Admin {
             wp_die('', '', array('response' => 403));
         }
 
-        $notice = isset($_POST['notice']) ? sanitize_key($_POST['notice']) : '';
+        $notice = isset($_POST['notice']) ? sanitize_key(wp_unslash($_POST['notice'])) : '';
 
         if (isset(self::$dismissible_notices[$notice])) {
             update_option(self::$dismissible_notices[$notice], true);
@@ -130,29 +130,32 @@ class Mpesa_Encryption_Admin {
         ?>
         <div class="notice notice-warning is-dismissible" id="mpesa-encryption-notice">
             <p>
-                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                <?php esc_html_e('Your API credentials are currently stored unencrypted. We recommend migrating to encrypted storage for enhanced security.', 'mpesa-gateway-for-woocommerce'); ?>
+                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                <?php esc_html_e('Your API credentials are currently stored unencrypted. We recommend migrating to encrypted storage for enhanced security.', 'marupurupu-checkout-for-mpesa'); ?>
             </p>
             <p>
                 <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_migrate_credentials'), 'mpesa_migrate')); ?>" class="button button-primary">
-                    <?php esc_html_e('Migrate to Encrypted Storage', 'mpesa-gateway-for-woocommerce'); ?>
+                    <?php esc_html_e('Migrate to Encrypted Storage', 'marupurupu-checkout-for-mpesa'); ?>
                 </a>
-                <button type="button" class="button" onclick="mpesaDismissEncryptionNotice()">
-                    <?php esc_html_e('Dismiss', 'mpesa-gateway-for-woocommerce'); ?>
+                <button type="button" class="button mpesa-dismiss-notice" data-notice="encryption" data-target="mpesa-encryption-notice">
+                    <?php esc_html_e('Dismiss', 'marupurupu-checkout-for-mpesa'); ?>
                 </button>
             </p>
         </div>
-        <script>
-        function mpesaDismissEncryptionNotice() {
-            jQuery.post(ajaxurl, {
-                action: 'mpesa_dismiss_notice',
-                notice: 'encryption',
-                nonce: '<?php echo esc_js(wp_create_nonce('mpesa_dismiss_notice')); ?>'
-            });
-            jQuery('#mpesa-encryption-notice').fadeOut();
-        }
-        </script>
         <?php
+        self::enqueue_notice_script();
+    }
+
+    /**
+     * Enqueue the script that persists a notice's "Dismiss" click (shared by
+     * migration_notice() and weak_key_notice()). Safe to call more than
+     * once per page -- WordPress only registers a handle once.
+     */
+    private static function enqueue_notice_script() {
+        wp_enqueue_script('mpesa-admin-notices', WC_MPESA_TILL_PLUGIN_URL . 'assets/js/mpesa-admin-notices.js', array('jquery'), WC_MPESA_TILL_VERSION, true);
+        wp_localize_script('mpesa-admin-notices', 'mpesaAdminNotices', array(
+            'nonce' => wp_create_nonce('mpesa_dismiss_notice'),
+        ));
     }
 
     /**
@@ -177,29 +180,20 @@ class Mpesa_Encryption_Admin {
         ?>
         <div class="notice notice-error is-dismissible" id="mpesa-weak-key-notice">
             <p>
-                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                <?php esc_html_e('WordPress security keys (AUTH_KEY / SECURE_AUTH_KEY) are not configured in wp-config.php. Your stored M-Pesa credentials are currently encrypted with a key derived from your site URL, which is public and guessable. Please configure real security keys as soon as possible.', 'mpesa-gateway-for-woocommerce'); ?>
+                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                <?php esc_html_e('WordPress security keys (AUTH_KEY / SECURE_AUTH_KEY) are not configured in wp-config.php. Your stored M-Pesa credentials are currently encrypted with a key derived from your site URL, which is public and guessable. Please configure real security keys as soon as possible.', 'marupurupu-checkout-for-mpesa'); ?>
             </p>
             <p>
                 <a href="https://api.wordpress.org/secret-key/1.1/salt/" target="_blank" rel="noopener noreferrer" class="button button-primary">
-                    <?php esc_html_e('Generate WordPress security keys', 'mpesa-gateway-for-woocommerce'); ?>
+                    <?php esc_html_e('Generate WordPress security keys', 'marupurupu-checkout-for-mpesa'); ?>
                 </a>
-                <button type="button" class="button" onclick="mpesaDismissWeakKeyNotice()">
-                    <?php esc_html_e('Dismiss', 'mpesa-gateway-for-woocommerce'); ?>
+                <button type="button" class="button mpesa-dismiss-notice" data-notice="weak_key" data-target="mpesa-weak-key-notice">
+                    <?php esc_html_e('Dismiss', 'marupurupu-checkout-for-mpesa'); ?>
                 </button>
             </p>
         </div>
-        <script>
-        function mpesaDismissWeakKeyNotice() {
-            jQuery.post(ajaxurl, {
-                action: 'mpesa_dismiss_notice',
-                notice: 'weak_key',
-                nonce: '<?php echo esc_js(wp_create_nonce('mpesa_dismiss_notice')); ?>'
-            });
-            jQuery('#mpesa-weak-key-notice').fadeOut();
-        }
-        </script>
         <?php
+        self::enqueue_notice_script();
     }
 
     /**
@@ -219,8 +213,8 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-error">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                    <?php esc_html_e('A credential was just saved WITHOUT encryption because encryption failed (OpenSSL unavailable or an internal error -- see your PHP error log). Fix the underlying issue, then re-save your M-Pesa settings to re-encrypt it.', 'mpesa-gateway-for-woocommerce'); ?>
+                    <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                    <?php esc_html_e('A credential was just saved WITHOUT encryption because encryption failed (OpenSSL unavailable or an internal error -- see your PHP error log). Fix the underlying issue, then re-save your M-Pesa settings to re-encrypt it.', 'marupurupu-checkout-for-mpesa'); ?>
                 </p>
             </div>
             <?php
@@ -230,8 +224,8 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-error">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                    <?php esc_html_e('Stored M-Pesa credentials could not be decrypted -- the encryption key (WordPress AUTH_KEY/SECURE_AUTH_KEY) may have changed since they were saved. Re-enter and save your credentials on the M-Pesa settings page.', 'mpesa-gateway-for-woocommerce'); ?>
+                    <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                    <?php esc_html_e('Stored M-Pesa credentials could not be decrypted -- the encryption key (WordPress AUTH_KEY/SECURE_AUTH_KEY) may have changed since they were saved. Re-enter and save your credentials on the M-Pesa settings page.', 'marupurupu-checkout-for-mpesa'); ?>
                 </p>
             </div>
             <?php
@@ -262,12 +256,12 @@ class Mpesa_Encryption_Admin {
         ?>
         <div class="notice notice-warning">
             <p>
-                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                <?php esc_html_e('Your stored M-Pesa API credentials were cleared as part of a security upgrade to how they\'re encrypted. This was a deliberate, one-time reset -- not an error -- because safely converting the old encrypted values wasn\'t possible without risking silently corrupted credentials being used against a live payment API. Please re-enter and save your Consumer Key, Consumer Secret, and Passkey on the M-Pesa settings page before accepting payments again.', 'mpesa-gateway-for-woocommerce'); ?>
+                <strong><?php esc_html_e('M-Pesa Till Payment Gateway:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                <?php esc_html_e('Your stored M-Pesa API credentials were cleared as part of a security upgrade to how they\'re encrypted. This was a deliberate, one-time reset -- not an error -- because safely converting the old encrypted values wasn\'t possible without risking silently corrupted credentials being used against a live payment API. Please re-enter and save your Consumer Key, Consumer Secret, and Passkey on the M-Pesa settings page before accepting payments again.', 'marupurupu-checkout-for-mpesa'); ?>
             </p>
             <p>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa_till')); ?>" class="button button-primary">
-                    <?php esc_html_e('Go to M-Pesa Settings', 'mpesa-gateway-for-woocommerce'); ?>
+                    <?php esc_html_e('Go to M-Pesa Settings', 'marupurupu-checkout-for-mpesa'); ?>
                 </a>
             </p>
         </div>
@@ -302,65 +296,65 @@ class Mpesa_Encryption_Admin {
 
         ?>
         <div class="mpesa-encryption-status" style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid <?php echo $all_encrypted ? '#46b450' : '#ffb900'; ?>;">
-            <h3 style="margin-top: 0;"><?php esc_html_e('Encryption Status', 'mpesa-gateway-for-woocommerce'); ?></h3>
+            <h3 style="margin-top: 0;"><?php esc_html_e('Encryption Status', 'marupurupu-checkout-for-mpesa'); ?></h3>
 
             <table class="widefat" style="max-width: 600px;">
                 <tbody>
                     <tr>
-                        <td><strong><?php esc_html_e('OpenSSL Extension', 'mpesa-gateway-for-woocommerce'); ?></strong></td>
+                        <td><strong><?php esc_html_e('OpenSSL Extension', 'marupurupu-checkout-for-mpesa'); ?></strong></td>
                         <td>
                             <?php if ($openssl_available): ?>
-                                <span style="color: #46b450;">✓ <?php esc_html_e('Available', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #46b450;">✓ <?php esc_html_e('Available', 'marupurupu-checkout-for-mpesa'); ?></span>
                             <?php else: ?>
-                                <span style="color: #dc3232;">✗ <?php esc_html_e('Not Available', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #dc3232;">✗ <?php esc_html_e('Not Available', 'marupurupu-checkout-for-mpesa'); ?></span>
                                 <p style="margin: 5px 0 0 0; color: #dc3232;">
-                                    <?php esc_html_e('OpenSSL PHP extension is required for encryption. Please enable it in your PHP configuration.', 'mpesa-gateway-for-woocommerce'); ?>
+                                    <?php esc_html_e('OpenSSL PHP extension is required for encryption. Please enable it in your PHP configuration.', 'marupurupu-checkout-for-mpesa'); ?>
                                 </p>
                             <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong><?php esc_html_e('Encryption Test', 'mpesa-gateway-for-woocommerce'); ?></strong></td>
+                        <td><strong><?php esc_html_e('Encryption Test', 'marupurupu-checkout-for-mpesa'); ?></strong></td>
                         <td>
                             <?php if ($encryption_working): ?>
-                                <span style="color: #46b450;">✓ <?php esc_html_e('Working', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #46b450;">✓ <?php esc_html_e('Working', 'marupurupu-checkout-for-mpesa'); ?></span>
                             <?php else: ?>
-                                <span style="color: #dc3232;">✗ <?php esc_html_e('Failed', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #dc3232;">✗ <?php esc_html_e('Failed', 'marupurupu-checkout-for-mpesa'); ?></span>
                             <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong><?php esc_html_e('Credentials Status', 'mpesa-gateway-for-woocommerce'); ?></strong></td>
+                        <td><strong><?php esc_html_e('Credentials Status', 'marupurupu-checkout-for-mpesa'); ?></strong></td>
                         <td>
                             <?php if ($all_encrypted): ?>
-                                <span style="color: #46b450;">✓ <?php esc_html_e('All credentials encrypted', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #46b450;">✓ <?php esc_html_e('All credentials encrypted', 'marupurupu-checkout-for-mpesa'); ?></span>
                             <?php else: ?>
-                                <span style="color: #ffb900;">⚠ <?php esc_html_e('Some credentials unencrypted', 'mpesa-gateway-for-woocommerce'); ?></span>
+                                <span style="color: #ffb900;">⚠ <?php esc_html_e('Some credentials unencrypted', 'marupurupu-checkout-for-mpesa'); ?></span>
                                 <p style="margin: 5px 0 0 0;">
                                     <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_migrate_credentials'), 'mpesa_migrate')); ?>" class="button button-small">
-                                        <?php esc_html_e('Migrate Now', 'mpesa-gateway-for-woocommerce'); ?>
+                                        <?php esc_html_e('Migrate Now', 'marupurupu-checkout-for-mpesa'); ?>
                                     </a>
                                 </p>
                             <?php endif; ?>
                         </td>
                     </tr>
                     <tr>
-                        <td><strong><?php esc_html_e('Encryption Method', 'mpesa-gateway-for-woocommerce'); ?></strong></td>
+                        <td><strong><?php esc_html_e('Encryption Method', 'marupurupu-checkout-for-mpesa'); ?></strong></td>
                         <td>AES-256-GCM</td>
                     </tr>
                     <tr>
-                        <td><strong><?php esc_html_e('Encryption Key Source', 'mpesa-gateway-for-woocommerce'); ?></strong></td>
+                        <td><strong><?php esc_html_e('Encryption Key Source', 'marupurupu-checkout-for-mpesa'); ?></strong></td>
                         <td>
                             <?php
                             if (defined('AUTH_KEY') && AUTH_KEY !== 'put your unique phrase here') {
-                                echo '<span style="color: #46b450;">✓ ' . esc_html__('WordPress AUTH_KEY', 'mpesa-gateway-for-woocommerce') . '</span>';
+                                echo '<span style="color: #46b450;">✓ ' . esc_html__('WordPress AUTH_KEY', 'marupurupu-checkout-for-mpesa') . '</span>';
                             } elseif (defined('SECURE_AUTH_KEY') && SECURE_AUTH_KEY !== 'put your unique phrase here') {
-                                echo '<span style="color: #ffb900;">⚠ ' . esc_html__('WordPress SECURE_AUTH_KEY (fallback)', 'mpesa-gateway-for-woocommerce') . '</span>';
+                                echo '<span style="color: #ffb900;">⚠ ' . esc_html__('WordPress SECURE_AUTH_KEY (fallback)', 'marupurupu-checkout-for-mpesa') . '</span>';
                             } else {
-                                echo '<span style="color: #dc3232;">✗ ' . esc_html__('Site URL (weak fallback)', 'mpesa-gateway-for-woocommerce') . '</span>';
+                                echo '<span style="color: #dc3232;">✗ ' . esc_html__('Site URL (weak fallback)', 'marupurupu-checkout-for-mpesa') . '</span>';
                                 echo '<p style="margin: 5px 0 0 0; color: #dc3232;">';
-                                esc_html_e('Please configure WordPress security keys in wp-config.php for stronger encryption.', 'mpesa-gateway-for-woocommerce');
-                                echo ' <a href="https://api.wordpress.org/secret-key/1.1/salt/" target="_blank">' . esc_html__('Generate keys', 'mpesa-gateway-for-woocommerce') . '</a>';
+                                esc_html_e('Please configure WordPress security keys in wp-config.php for stronger encryption.', 'marupurupu-checkout-for-mpesa');
+                                echo ' <a href="https://api.wordpress.org/secret-key/1.1/salt/" target="_blank">' . esc_html__('Generate keys', 'marupurupu-checkout-for-mpesa') . '</a>';
                                 echo '</p>';
                             }
                             ?>
@@ -370,7 +364,7 @@ class Mpesa_Encryption_Admin {
             </table>
 
             <p style="margin: 15px 0 0 0; font-size: 12px; color: #666;">
-                <?php esc_html_e('Credentials are encrypted using AES-256-GCM (authenticated encryption) when saved to the database. They are automatically decrypted when loaded for use.', 'mpesa-gateway-for-woocommerce'); ?>
+                <?php esc_html_e('Credentials are encrypted using AES-256-GCM (authenticated encryption) when saved to the database. They are automatically decrypted when loaded for use.', 'marupurupu-checkout-for-mpesa'); ?>
             </p>
         </div>
         <?php
@@ -407,27 +401,27 @@ class Mpesa_Encryption_Admin {
         }
 
         $mode_label = $gateway->testmode
-            ? __('Test/Sandbox', 'mpesa-gateway-for-woocommerce')
-            : __('Live/Production', 'mpesa-gateway-for-woocommerce');
+            ? __('Test/Sandbox', 'marupurupu-checkout-for-mpesa')
+            : __('Live/Production', 'marupurupu-checkout-for-mpesa');
 
         ?>
         <div class="mpesa-connection-test" style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-left: 4px solid #666;">
-            <h3 style="margin-top: 0;"><?php esc_html_e('Test M-Pesa Connection', 'mpesa-gateway-for-woocommerce'); ?></h3>
+            <h3 style="margin-top: 0;"><?php esc_html_e('Test M-Pesa Connection', 'marupurupu-checkout-for-mpesa'); ?></h3>
             <p>
                 <?php
                 printf(
                     /* translators: %s: "Test/Sandbox" or "Live/Production" */
-                    wp_kses_post(__('Checks the currently saved Consumer Key/Secret (%s mode) against Safaricom right now, and tells you plainly whether they work -- rather than waiting for a customer\'s checkout to fail.', 'mpesa-gateway-for-woocommerce')),
+                    wp_kses_post(__('Checks the currently saved Consumer Key/Secret (%s mode) against Safaricom right now, and tells you plainly whether they work -- rather than waiting for a customer\'s checkout to fail.', 'marupurupu-checkout-for-mpesa')),
                     '<strong>' . esc_html($mode_label) . '</strong>'
                 );
                 ?>
             </p>
             <p>
                 <?php if (empty($gateway->consumer_key) || empty($gateway->consumer_secret)): ?>
-                    <em><?php esc_html_e('No Consumer Key/Secret saved for the current mode yet -- save your settings first.', 'mpesa-gateway-for-woocommerce'); ?></em>
+                    <em><?php esc_html_e('No Consumer Key/Secret saved for the current mode yet -- save your settings first.', 'marupurupu-checkout-for-mpesa'); ?></em>
                 <?php else: ?>
                     <a href="<?php echo esc_url(wp_nonce_url(admin_url('admin-post.php?action=mpesa_test_connection'), 'mpesa_test_connection')); ?>" class="button button-primary">
-                        <?php esc_html_e('Test Connection Now', 'mpesa-gateway-for-woocommerce'); ?>
+                        <?php esc_html_e('Test Connection Now', 'marupurupu-checkout-for-mpesa'); ?>
                     </a>
                 <?php endif; ?>
             </p>
@@ -443,18 +437,18 @@ class Mpesa_Encryption_Admin {
      * already-scrubbed message.
      */
     public static function handle_test_connection() {
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'mpesa_test_connection')) {
-            wp_die(__('Security check failed', 'mpesa-gateway-for-woocommerce'));
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_test_connection')) {
+            wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(__('You do not have permission to perform this action', 'mpesa-gateway-for-woocommerce'));
+            wp_die(esc_html__('You do not have permission to perform this action', 'marupurupu-checkout-for-mpesa'));
         }
 
         $gateway = self::get_gateway();
         $result = array(
             'success' => false,
-            'message' => __('M-Pesa gateway not found.', 'mpesa-gateway-for-woocommerce'),
+            'message' => __('M-Pesa gateway not found.', 'marupurupu-checkout-for-mpesa'),
         );
 
         if ($gateway) {
@@ -490,13 +484,13 @@ class Mpesa_Encryption_Admin {
      */
     public static function handle_migration() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'mpesa_migrate')) {
-            wp_die(__('Security check failed', 'mpesa-gateway-for-woocommerce'));
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_migrate')) {
+            wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
         // Check permissions
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(__('You do not have permission to perform this action', 'mpesa-gateway-for-woocommerce'));
+            wp_die(esc_html__('You do not have permission to perform this action', 'marupurupu-checkout-for-mpesa'));
         }
 
         // Perform migration
@@ -523,13 +517,13 @@ class Mpesa_Encryption_Admin {
      */
     public static function handle_encryption_test() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(wp_unslash($_GET['_wpnonce']), 'mpesa_test_encryption')) {
-            wp_die(__('Security check failed', 'mpesa-gateway-for-woocommerce'));
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'mpesa_test_encryption')) {
+            wp_die(esc_html__('Security check failed', 'marupurupu-checkout-for-mpesa'));
         }
 
         // Check permissions
         if (!current_user_can('manage_woocommerce')) {
-            wp_die(__('You do not have permission to perform this action', 'mpesa-gateway-for-woocommerce'));
+            wp_die(esc_html__('You do not have permission to perform this action', 'marupurupu-checkout-for-mpesa'));
         }
 
         // Run test
@@ -579,10 +573,10 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-success is-dismissible">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Encryption:', 'mpesa-gateway-for-woocommerce'); ?></strong>
+                    <strong><?php esc_html_e('M-Pesa Encryption:', 'marupurupu-checkout-for-mpesa'); ?></strong>
                     <?php
                     /* translators: %d: number of credentials migrated */
-                    printf(esc_html__('Successfully migrated %d credential(s) to encrypted storage.', 'mpesa-gateway-for-woocommerce'), absint($count));
+                    printf(esc_html__('Successfully migrated %d credential(s) to encrypted storage.', 'marupurupu-checkout-for-mpesa'), absint($count));
                     ?>
                 </p>
             </div>
@@ -591,8 +585,8 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-error is-dismissible">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Encryption:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                    <?php esc_html_e('Migration failed. Please check error logs.', 'mpesa-gateway-for-woocommerce'); ?>
+                    <strong><?php esc_html_e('M-Pesa Encryption:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                    <?php esc_html_e('Migration failed. Please check error logs.', 'marupurupu-checkout-for-mpesa'); ?>
                 </p>
             </div>
             <?php
@@ -613,8 +607,8 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-success is-dismissible">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Encryption:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                    <?php esc_html_e('Encryption test passed successfully.', 'mpesa-gateway-for-woocommerce'); ?>
+                    <strong><?php esc_html_e('M-Pesa Encryption:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                    <?php esc_html_e('Encryption test passed successfully.', 'marupurupu-checkout-for-mpesa'); ?>
                 </p>
             </div>
             <?php
@@ -622,8 +616,8 @@ class Mpesa_Encryption_Admin {
             ?>
             <div class="notice notice-error is-dismissible">
                 <p>
-                    <strong><?php esc_html_e('M-Pesa Encryption:', 'mpesa-gateway-for-woocommerce'); ?></strong>
-                    <?php esc_html_e('Encryption test failed. Please check that OpenSSL is enabled.', 'mpesa-gateway-for-woocommerce'); ?>
+                    <strong><?php esc_html_e('M-Pesa Encryption:', 'marupurupu-checkout-for-mpesa'); ?></strong>
+                    <?php esc_html_e('Encryption test failed. Please check that OpenSSL is enabled.', 'marupurupu-checkout-for-mpesa'); ?>
                 </p>
             </div>
             <?php
@@ -655,7 +649,7 @@ class Mpesa_Encryption_Admin {
         ?>
         <div class="notice <?php echo esc_attr($notice_class); ?> is-dismissible">
             <p>
-                <strong><?php esc_html_e('M-Pesa Connection Test:', 'mpesa-gateway-for-woocommerce'); ?></strong>
+                <strong><?php esc_html_e('M-Pesa Connection Test:', 'marupurupu-checkout-for-mpesa'); ?></strong>
                 <?php echo esc_html($icon . ' ' . $message); ?>
             </p>
         </div>

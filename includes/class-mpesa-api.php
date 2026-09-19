@@ -115,7 +115,7 @@ class Mpesa_API {
         if (empty($this->consumer_key) || empty($this->consumer_secret)) {
             return array(
                 'success' => false,
-                'message' => __('Consumer Key/Secret for the currently selected mode (Test or Live) are not set.', 'mpesa-gateway-for-woocommerce'),
+                'message' => __('Consumer Key/Secret for the currently selected mode (Test or Live) are not set.', 'marupurupu-checkout-for-mpesa'),
             );
         }
 
@@ -125,7 +125,7 @@ class Mpesa_API {
             return array(
                 'success' => false,
                 /* translators: %s: the underlying HTTP/connection error message */
-                'message' => sprintf(__('Could not reach Safaricom: %s', 'mpesa-gateway-for-woocommerce'), $result['http_error']),
+                'message' => sprintf(__('Could not reach Safaricom: %s', 'marupurupu-checkout-for-mpesa'), $result['http_error']),
             );
         }
 
@@ -134,12 +134,12 @@ class Mpesa_API {
             if (isset($decoded['access_token'])) {
                 return array(
                     'success' => true,
-                    'message' => __('Connected successfully -- Safaricom accepted these credentials and issued an access token.', 'mpesa-gateway-for-woocommerce'),
+                    'message' => __('Connected successfully -- Safaricom accepted these credentials and issued an access token.', 'marupurupu-checkout-for-mpesa'),
                 );
             }
             return array(
                 'success' => false,
-                'message' => __('Safaricom returned an unexpected response (HTTP 200 with no access token).', 'mpesa-gateway-for-woocommerce'),
+                'message' => __('Safaricom returned an unexpected response (HTTP 200 with no access token).', 'marupurupu-checkout-for-mpesa'),
             );
         }
 
@@ -150,13 +150,13 @@ class Mpesa_API {
         }
 
         if ($reason === '') {
-            $reason = __('the Consumer Key/Secret for the currently selected mode (Test or Live) were rejected. Double-check you copied the Consumer Secret -- not the Passkey -- from the Daraja app page.', 'mpesa-gateway-for-woocommerce');
+            $reason = __('the Consumer Key/Secret for the currently selected mode (Test or Live) were rejected. Double-check you copied the Consumer Secret -- not the Passkey -- from the Daraja app page.', 'marupurupu-checkout-for-mpesa');
         }
 
         return array(
             'success' => false,
             /* translators: 1: HTTP status code, 2: reason */
-            'message' => sprintf(__('Connection failed (HTTP %1$d): %2$s', 'mpesa-gateway-for-woocommerce'), $result['status'], $reason),
+            'message' => sprintf(__('Connection failed (HTTP %1$d): %2$s', 'marupurupu-checkout-for-mpesa'), $result['status'], $reason),
         );
     }
 
