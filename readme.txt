@@ -4,7 +4,7 @@ Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.5
+Stable tag: 1.5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,7 +33,7 @@ Marupurupu Checkout for M-Pesa and WooCommerce allows you to accept payments via
 
 = Requirements =
 
-* WordPress 5.0 or higher
+* WordPress 5.3 or higher
 * WooCommerce 3.0 or higher (5.5+ recommended for block checkout)
 * PHP 7.4 or higher
 * SSL Certificate (required for M-Pesa STK Push)
@@ -63,6 +63,19 @@ Marupurupu Checkout for M-Pesa and WooCommerce allows you to accept payments via
 * Payment instructions for customers
 * Debug logging
 * Telemetry (usage tracking)
+
+= External services =
+
+This plugin connects to the third-party services below. Nothing is sent to Safaricom until you configure the plugin and a payment is attempted, and nothing is sent to the usage-statistics collector unless you opt in.
+
+**Safaricom Daraja API** (`api.safaricom.co.ke`, or `sandbox.safaricom.co.ke` when Test Mode is on) — the service that actually takes the M-Pesa payment.
+* Used for: requesting an access token, sending an STK Push payment prompt to the customer's phone, and checking the status of a payment. Safaricom also posts the payment result back to your site's callback URL.
+* Sent, and when: your Consumer Key and Consumer Secret (to obtain a token — whenever one is needed and when you click "Test M-Pesa Connection"); and, when a customer pays, your Business Short Code and Till Number, a request password derived from your Passkey, the order amount, the customer's M-Pesa phone number, an order reference ("Order-" plus the order number) and your site's callback URL.
+* Provider: Safaricom PLC. Daraja developer portal: https://developer.safaricom.co.ke/ (its Terms and Conditions and Privacy Policy are linked from the portal footer). Safaricom terms: https://safaricom.co.ke/about/media-center/publications/terms-and-conditions
+
+**Plugin usage-statistics collector** (`telemetry.billtoolbox.com`) — optional and off by default; used only if you tick "Help improve this plugin by sharing anonymous usage data" in the gateway settings. Exactly what is sent, and when, is listed field by field under "Privacy Policy" below. Operated by the plugin author (https://billtoolbox.com). Terms: https://billtoolbox.com/terms/ — Privacy Policy: https://billtoolbox.com/privacy-policy/
+
+**WordPress.org secret-key generator** (`api.wordpress.org/secret-key/1.1/salt/`) — only a link in an admin notice shown when your site's security keys are missing. The plugin sends nothing to it; your browser opens it only if you click the link.
 
 == Installation ==
 
@@ -109,7 +122,7 @@ Yes, M-Pesa STK Push requires your site to have a valid SSL certificate (HTTPS).
 
 = What is a Till Number? =
 
-A Till Number is your M-Pesa business short code (Pay Bill or Buy Goods number).
+A Till Number is your M-Pesa Buy Goods business number. This plugin currently supports Till (Buy Goods) payments only; Paybill numbers are not supported.
 
 = Can I test before going live? =
 
@@ -141,6 +154,13 @@ The plugin automatically generates a callback URL, including a secret token uniq
 6. Payment settings and encryption management
 
 == Changelog ==
+
+= 1.5.6 - 2026-09-19 =
+* Fixed: **Block-based checkout could not collect a phone number.** The block checkout component only displayed the payment description; the phone-number field, its validation and the code that submits it with the order had been lost in an earlier source-tree consolidation, so paying with M-Pesa on the WooCommerce Cart & Checkout blocks could not work. Restored. Classic checkout was never affected.
+* Added: Declares WooCommerce Cart & Checkout blocks compatibility (`cart_checkout_blocks`), so WooCommerce no longer lists the gateway as incompatible with block checkout.
+* Fixed: Readme said Paybill numbers were supported; the plugin supports Till (Buy Goods) only. Corrected, along with the minimum WordPress version (5.3), the Support section (no documentation files ship with the plugin) and the telemetry opt-out description.
+* Added: "External services" section in the readme documenting the Safaricom Daraja API and the optional usage-statistics collector — what is sent, when, and links to their terms and privacy policies.
+* Removed: `config-sample.php`, which described a constants-based credential mechanism that the plugin never implemented. Credentials are entered on the gateway settings screen and stored encrypted.
 
 = 1.5.5 - 2026-09-18 =
 * Changed: **Renamed** to "Marupurupu Checkout for M-Pesa and WooCommerce" (slug, folder, main file, and text domain `marupurupu-checkout-for-mpesa`), following WordPress.org Plugin Review Team feedback that the previous name led with a third-party trademark. "Marupurupu" is a Swahili word meaning "allowances". No functional change: internal identifiers, the database table (`wp_mpesa_till_transactions`), the option keys, and the Daraja callback URL (`/wc-api/wc_mpesa_till_callback/`) are all unchanged. Existing installs need a manual reinstall to pick up the new folder name (WordPress cannot rename an installed plugin's folder in an update); stored settings are unaffected.
@@ -250,7 +270,7 @@ Initial release. Please test in sandbox mode before using in production.
 
 = Compatibility =
 
-* WordPress: 5.0+
+* WordPress: 5.3+
 * WooCommerce: 3.0+ (5.5+ for block checkout)
 * PHP: 7.4, 8.0, 8.1, 8.2
 * WooCommerce Blocks: 11.0+
@@ -287,8 +307,8 @@ This plugin:
 Anonymous usage telemetry is **off by default**. It only activates if you
 check "Help improve this plugin by sharing anonymous usage data" under
 WooCommerce > Settings > Payments > M-Pesa Till > Anonymous Usage Data, and
-stops immediately (including any scheduled events) if you uncheck it or
-deactivate the plugin.
+stops sending anything as soon as you uncheck it or deactivate the plugin (any leftover scheduled
+tasks then do nothing).
 
 **Site identifier**: every event includes a `site_id` — a SHA-256 hash of
 your site's URL. This is a stable, unique-per-install pseudonymous
@@ -352,7 +372,6 @@ This plugin is not officially affiliated with, endorsed by, or sponsored by Safa
 == Support ==
 
 Need help?
-1. Check included documentation files
-2. Enable debug logging
-3. Review troubleshooting guides
-4. Contact plugin developer with details
+1. Read the FAQ above.
+2. Turn on WordPress debug logging (WP_DEBUG_LOG) and check WooCommerce > Status > Logs (source "mpesa-till-callback") and wp-content/debug.log.
+3. Ask in this plugin's support forum on WordPress.org, with your WordPress, WooCommerce and PHP versions and the relevant log lines. Never post your Consumer Key, Consumer Secret or Passkey.

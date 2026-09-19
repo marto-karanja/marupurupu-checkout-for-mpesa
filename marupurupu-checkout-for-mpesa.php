@@ -3,7 +3,7 @@
  * Plugin Name: Marupurupu Checkout for M-Pesa and WooCommerce
  * Plugin URI: https://github.com/marto-karanja/marupurupu-checkout-for-mpesa
  * Description: Accept M-Pesa Till payments via STK Push for WooCommerce
- * Version: 1.5.5
+ * Version: 1.5.6
  * Author: Martin Mburu
  * Author URI: https://billtoolbox.com
  * Text Domain: marupurupu-checkout-for-mpesa
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('WC_MPESA_TILL_VERSION', '1.5.5');
+define('WC_MPESA_TILL_VERSION', '1.5.6');
 define('WC_MPESA_TILL_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WC_MPESA_TILL_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -37,11 +37,15 @@ function wc_mpesa_till_woocommerce_missing_notice() {
 }
 
 /**
- * Declare HPOS compatibility
+ * Declare WooCommerce feature compatibility: HPOS (custom order tables) and
+ * the Cart & Checkout blocks. Without the blocks declaration WooCommerce lists
+ * this gateway as "incompatible" on its Features screen even though
+ * WC_Mpesa_Till_Blocks_Support registers it for the block checkout.
  */
 add_action('before_woocommerce_init', function() {
     if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
     }
 });
 
