@@ -280,7 +280,7 @@ class Marupurupu_Encryption_Admin {
         }
 
         // Only show when viewing payment gateway settings
-        if (!isset($_GET['section']) || $_GET['section'] !== 'mpesa_till') {
+        if (!isset($_GET['section']) || sanitize_text_field(wp_unslash($_GET['section'])) !== 'mpesa_till') {
             return;
         }
 
@@ -391,7 +391,7 @@ class Marupurupu_Encryption_Admin {
             return;
         }
 
-        if (!isset($_GET['section']) || $_GET['section'] !== 'mpesa_till') {
+        if (!isset($_GET['section']) || sanitize_text_field(wp_unslash($_GET['section'])) !== 'mpesa_till') {
             return;
         }
 

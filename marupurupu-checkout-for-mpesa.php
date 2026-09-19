@@ -98,16 +98,7 @@ function marupurupu_init() {
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-ajax.php';
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-order-received.php';
 
-    // Reports (charts/revenue dashboard) is loaded through the feature gate
-    // rather than unconditionally — currently always enabled (free for
-    // everyone, no change in behavior), but this is the seam a future
-    // Pro-tier decision hooks into instead of touching this file. See the
-    // doc comment at the top of class-mpesa-feature-gate.php before
-    // changing this.
-    require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-feature-gate.php';
-    if (Marupurupu_Feature_Gate::reports_enabled()) {
-        require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-reports.php';
-    }
+    require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-reports.php';
 
     // Telemetry (opt-in, default off — see class-mpesa-telemetry.php::is_enabled())
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-telemetry.php';
@@ -117,13 +108,6 @@ function marupurupu_init() {
 
     // Auto-encrypt credentials on first load (one-time migration)
     add_action('admin_init', 'marupurupu_check_encryption', 5);
-
-    // Record whether this is a pre-existing install, for a future Pro-tier
-    // decision (see class-mpesa-feature-gate.php's doc comment). Same
-    // "run once via admin_init" pattern as the encryption check above,
-    // for the same reason: register_activation_hook alone would miss any
-    // site that updates in place without deactivating first.
-    add_action('admin_init', 'marupurupu_check_legacy_grandfather', 5);
 }
 
 function marupurupu_add_gateway($gateways) {
@@ -174,11 +158,6 @@ function marupurupu_activate() {
     // Auto-migrate existing credentials to encrypted format
     // This runs on plugin activation/update
     marupurupu_auto_encrypt_credentials();
-
-    // Record pre-existing-install status for a future Pro-tier decision.
-    // See marupurupu_determine_legacy_grandfather() for what this means
-    // and why it's captured on both activation and admin_init.
-    marupurupu_determine_legacy_grandfather();
 }
 
 /**
@@ -245,63 +224,6 @@ function marupurupu_check_encryption() {
 
     // Run auto-encryption
     marupurupu_auto_encrypt_credentials();
-}
-
-/**
- * Check whether this site's pre-existing-install status has been recorded
- * yet (one-time, same pattern as marupurupu_check_encryption() above).
- * This is the admin_init half of grandfather detection — it exists
- * specifically because register_activation_hook() only fires on a fresh
- * activate, and does NOT re-fire when an already-active plugin is simply
- * updated to a new version in place. Most real users update rather than
- * deactivate-then-reactivate, so relying on the activation hook alone
- * would miss the exact sites this is meant to protect.
- */
-function marupurupu_check_legacy_grandfather() {
-    // Only run once (check if already determined)
-    if (get_option('marupurupu_legacy_grandfather_checked')) {
-        return;
-    }
-
-    // Mark as checked immediately to prevent multiple runs
-    update_option('marupurupu_legacy_grandfather_checked', true);
-
-    marupurupu_determine_legacy_grandfather();
-}
-
-/**
- * Determine and permanently record whether this site was already a
- * configured M-Pesa Till install before any Pro-tier gating existed in the
- * code. See class-mpesa-feature-gate.php's file-level doc comment for the
- * full "why" — short version: nothing consults this flag yet (every
- * feature is free for everyone today), but capturing it now means a future
- * version that DOES start gating a feature can grandfather existing users
- * automatically, without ever needing to guess "was this site already here
- * before the cutover?" after the fact.
- *
- * Detection signal: the `woocommerce_mpesa_till_settings` option already
- * existing (even with blank credential fields) means WooCommerce's settings
- * API has already saved a form submission for this gateway at least once,
- * which only happens if a human visited the settings screen before this
- * code ever ran — i.e., a real pre-existing install, not a fresh one
- * starting today. A brand-new install has no such option yet, so it's
- * correctly left un-grandfathered.
- *
- * Deliberately a one-way latch: once set to true, later runs never
- * re-evaluate or unset it, so this can't accidentally un-grandfather a
- * site just because, say, someone reset their settings.
- */
-function marupurupu_determine_legacy_grandfather() {
-    // Already grandfathered from a previous run — never re-evaluate.
-    if (get_option('marupurupu_legacy_full_access') === true) {
-        return;
-    }
-
-    $existing_settings = get_option('woocommerce_mpesa_till_settings', false);
-
-    if ($existing_settings !== false) {
-        update_option('marupurupu_legacy_full_access', true);
-    }
 }
 
 /**

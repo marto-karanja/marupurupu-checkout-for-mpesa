@@ -157,6 +157,8 @@ The plugin automatically generates a callback URL, including a secret token uniq
 
 = 1.6.1 - 2026-09-19 =
 * Changed: The plugin's display name is now "Marupurupu Checkout for M-Pesa" (the "and WooCommerce" suffix was removed), following WordPress.org Plugin Review Team feedback that "WooCommerce" is a restricted term in plugin names. The slug, text domain, settings, saved credentials, orders and the Safaricom callback URL are all unchanged. No functional change.
+* Removed: Unused internal feature-flag code that was never connected to anything. Every feature remains available to everyone, as before.
+* Changed: One more admin-screen check now sanitizes the `section` query argument before comparing it.
 
 = 1.6.0 - 2026-09-19 =
 * Changed: **Unique naming prefix.** Every class, function, constant, option, transient, scheduled event, hook, AJAX action, script handle and admin menu slug the plugin registers now uses the prefix `marupurupu_` / `Marupurupu_` / `MARUPURUPU_` instead of the generic `mpesa` (which could collide with other M-Pesa plugins). The custom transactions table is now `{prefix}marupurupu_transactions`.
