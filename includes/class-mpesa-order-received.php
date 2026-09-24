@@ -63,6 +63,32 @@ class Marupurupu_Order_Received {
             'check_status_nonce' => wp_create_nonce('marupurupu_check_status'),
             'retry_payment_nonce' => wp_create_nonce('marupurupu_retry_payment'),
             'verify_code_nonce' => wp_create_nonce('marupurupu_verify_code'),
+            'i18n' => array(
+                'success_next' => __('Your order is being processed. You will receive a confirmation email shortly.', 'marupurupu-checkout-for-mpesa'),
+                /* translators: %d: number of seconds until the page reloads */
+                'refreshing' => __('Refreshing page in %d seconds...', 'marupurupu-checkout-for-mpesa'),
+                'what_next' => __('What to do next:', 'marupurupu-checkout-for-mpesa'),
+                'failed_step_1' => __('If you didn\'t complete the payment, click "Send Payment Request" below to retry', 'marupurupu-checkout-for-mpesa'),
+                'failed_step_2' => __('If you already paid, enter your M-Pesa transaction code to verify', 'marupurupu-checkout-for-mpesa'),
+                'failed_step_3' => __('Contact support if you need assistance', 'marupurupu-checkout-for-mpesa'),
+                'timeout_title' => __('Payment confirmation timeout', 'marupurupu-checkout-for-mpesa'),
+                'timeout_intro' => __('We haven\'t received confirmation yet. This could mean:', 'marupurupu-checkout-for-mpesa'),
+                'timeout_cause_1' => __('The payment is still processing (please wait a few more minutes)', 'marupurupu-checkout-for-mpesa'),
+                'timeout_cause_2' => __('You didn\'t complete the payment on your phone', 'marupurupu-checkout-for-mpesa'),
+                'timeout_cause_3' => __('There was a network delay', 'marupurupu-checkout-for-mpesa'),
+                'timeout_step_1' => __('Check your phone for M-Pesa confirmation SMS', 'marupurupu-checkout-for-mpesa'),
+                'timeout_step_2' => __('If you received an SMS, enter the transaction code below to verify', 'marupurupu-checkout-for-mpesa'),
+                'timeout_step_3' => __('If you didn\'t pay yet, click "Send Payment Request" to retry', 'marupurupu-checkout-for-mpesa'),
+                'timeout_step_4' => __('Refresh this page in a few minutes to check status', 'marupurupu-checkout-for-mpesa'),
+                'invalid_phone' => __('Please enter a valid phone number (format: 254XXXXXXXXX)', 'marupurupu-checkout-for-mpesa'),
+                'check_phone' => __('Check your phone now.', 'marupurupu-checkout-for-mpesa'),
+                'enter_code' => __('Please enter the M-Pesa transaction code', 'marupurupu-checkout-for-mpesa'),
+                'connection_error' => __('Connection error. Please try again.', 'marupurupu-checkout-for-mpesa'),
+                'sending' => __('Sending...', 'marupurupu-checkout-for-mpesa'),
+                'send_request' => __('Send Payment Request', 'marupurupu-checkout-for-mpesa'),
+                'verifying' => __('Verifying...', 'marupurupu-checkout-for-mpesa'),
+                'verify_payment' => __('Verify Payment', 'marupurupu-checkout-for-mpesa'),
+            ),
         ));
     }
 
@@ -234,7 +260,7 @@ class Marupurupu_Order_Received {
             <div class="mpesa-sms-example">
                 <?php esc_html_e('Your M-Pesa confirmation SMS looks like this:', 'marupurupu-checkout-for-mpesa'); ?><br><br>
                 <strong>QA12BC3DEF</strong> <?php esc_html_e('Confirmed', 'marupurupu-checkout-for-mpesa'); ?><br>
-                <?php esc_html_e('You have paid KES', 'marupurupu-checkout-for-mpesa'); ?> <?php echo number_format($order->get_total(), 2); ?><br>
+                <?php esc_html_e('You have paid KES', 'marupurupu-checkout-for-mpesa'); ?> <?php echo esc_html(number_format_i18n((float) $order->get_total(), 2)); ?><br>
                 <?php esc_html_e('on', 'marupurupu-checkout-for-mpesa'); ?> <?php echo esc_html(gmdate('d/m/Y \a\t h:i A')); ?>
             </div>
 
@@ -245,7 +271,7 @@ class Marupurupu_Order_Received {
                 <input
                     type="text"
                     id="mpesa-transaction-code"
-                    placeholder="<?php esc_html_e('e.g. QA12BC3DEF', 'marupurupu-checkout-for-mpesa'); ?>"
+                    placeholder="<?php esc_attr_e('e.g. QA12BC3DEF', 'marupurupu-checkout-for-mpesa'); ?>"
                     maxlength="20"
                     style="text-transform: uppercase;"
                 >

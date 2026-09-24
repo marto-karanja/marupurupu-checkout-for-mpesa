@@ -3,14 +3,15 @@
  * Plugin Name: Marupurupu Checkout for M-Pesa
  * Plugin URI: https://github.com/marto-karanja/marupurupu-checkout-for-mpesa
  * Description: Accept M-Pesa Till payments via STK Push for WooCommerce
- * Version: 1.6.1
+ * Version: 1.6.3
  * Author: Martin Mburu
  * Author URI: https://billtoolbox.com
  * Text Domain: marupurupu-checkout-for-mpesa
  * Requires at least: 5.3
  * Requires PHP: 7.4
+ * Requires Plugins: woocommerce
  * WC requires at least: 3.0
- * WC tested up to: 10.8
+ * WC tested up to: 11.1
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -35,20 +36,49 @@ if (!defined('ABSPATH')) {
  */
 
 // Define plugin constants
-define('MARUPURUPU_VERSION', '1.6.1');
+define('MARUPURUPU_VERSION', '1.6.3');
+define('MARUPURUPU_DB_VERSION', '1');
 define('MARUPURUPU_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MARUPURUPU_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-/**
- * Check if WooCommerce is active
+/*
+ * Registered before the WooCommerce check below on purpose: that check returns
+ * early when WooCommerce is inactive, and an activation hook registered after
+ * it would never exist in that case (the transactions table would not be
+ * created if the plugin is activated first).
  */
-if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+register_activation_hook(__FILE__, 'marupurupu_activate');
+
+/**
+ * Check if WooCommerce is active (on this site, or network-activated)
+ */
+function marupurupu_is_woocommerce_active() {
+    $active = (array) apply_filters('active_plugins', get_option('active_plugins', array()));
+
+    if (in_array('woocommerce/woocommerce.php', $active, true)) {
+        return true;
+    }
+
+    if (is_multisite()) {
+        $network_active = (array) get_site_option('active_sitewide_plugins', array());
+        return isset($network_active['woocommerce/woocommerce.php']);
+    }
+
+    return false;
+}
+
+if (!marupurupu_is_woocommerce_active()) {
     add_action('admin_notices', 'marupurupu_woocommerce_missing_notice');
     return;
 }
 
 function marupurupu_woocommerce_missing_notice() {
-    echo '<div class="error"><p><strong>Marupurupu Checkout for M-Pesa</strong> requires WooCommerce to be installed and active.</p></div>';
+    echo '<div class="notice notice-error"><p>';
+    echo wp_kses(
+        __('<strong>Marupurupu Checkout for M-Pesa</strong> requires WooCommerce to be installed and active.', 'marupurupu-checkout-for-mpesa'),
+        array('strong' => array())
+    );
+    echo '</p></div>';
 }
 
 /**
@@ -87,6 +117,8 @@ function marupurupu_init() {
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-marupurupu-migration.php';
     Marupurupu_Migration::run();
 
+    marupurupu_maybe_create_table();
+
     // Include required files
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-encryption.php';
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-mpesa-encryption-admin.php';
@@ -116,17 +148,28 @@ function marupurupu_add_gateway($gateways) {
 }
 
 /**
- * Create transaction table on activation
+ * Create transaction table on activation (hook registered near the top of this
+ * file, before the WooCommerce check).
  */
-register_activation_hook(__FILE__, 'marupurupu_activate');
-
 function marupurupu_activate() {
-    global $wpdb;
-
     // Move any data stored under the earlier "mpesa_*" names first, so dbDelta
     // below doesn't create a second, empty transactions table next to the old one.
     require_once MARUPURUPU_PLUGIN_DIR . 'includes/class-marupurupu-migration.php';
     Marupurupu_Migration::run();
+
+    marupurupu_create_table();
+
+    // Auto-migrate existing credentials to encrypted format
+    // This runs on plugin activation/update
+    marupurupu_auto_encrypt_credentials();
+}
+
+/**
+ * Create (or repair) the transactions table and record that it exists.
+ * Safe to call repeatedly: dbDelta only adds what is missing.
+ */
+function marupurupu_create_table() {
+    global $wpdb;
 
     $table_name = $wpdb->prefix . 'marupurupu_transactions';
     $charset_collate = $wpdb->get_charset_collate();
@@ -155,9 +198,29 @@ function marupurupu_activate() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 
-    // Auto-migrate existing credentials to encrypted format
-    // This runs on plugin activation/update
-    marupurupu_auto_encrypt_credentials();
+    update_option('marupurupu_db_version', MARUPURUPU_DB_VERSION);
+}
+
+/**
+ * Create the transactions table if it is missing (for example when the plugin
+ * was activated while WooCommerce was inactive, before the activation hook was
+ * registered ahead of the dependency check). Runs the check once per db
+ * version, and never touches a table that already exists.
+ */
+function marupurupu_maybe_create_table() {
+    if (get_option('marupurupu_db_version') === MARUPURUPU_DB_VERSION) {
+        return;
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'marupurupu_transactions';
+
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table_name))) === $table_name) {
+        update_option('marupurupu_db_version', MARUPURUPU_DB_VERSION);
+        return;
+    }
+
+    marupurupu_create_table();
 }
 
 /**
@@ -252,7 +315,7 @@ function marupurupu_register_blocks_support() {
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'marupurupu_action_links');
 
 function marupurupu_action_links($links) {
-    $settings_link = '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa_till') . '">Settings</a>';
+    $settings_link = '<a href="' . esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=mpesa_till')) . '">' . esc_html__('Settings', 'marupurupu-checkout-for-mpesa') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 }

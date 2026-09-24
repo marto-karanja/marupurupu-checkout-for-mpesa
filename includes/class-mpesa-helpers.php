@@ -116,6 +116,23 @@ class Marupurupu_Helpers {
     }
 
     /**
+     * Neutralise a text value for a CSV export. Spreadsheet programs run cells
+     * that start with = + - @ (or a tab/carriage return) as formulas, and some
+     * exported fields (transaction codes, result descriptions) originate outside
+     * the site. A leading apostrophe makes them plain text.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    public static function csv_safe($value) {
+        if (is_string($value) && $value !== '' && strpos("=+-@\t\r", $value[0]) !== false) {
+            return "'" . $value;
+        }
+
+        return $value;
+    }
+
+    /**
      * Format amount for display
      */
     public static function format_amount($amount) {

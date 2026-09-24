@@ -144,7 +144,7 @@ class Marupurupu_Ajax {
         set_transient($rate_limit_key, $attempts + 1, 10 * MINUTE_IN_SECONDS);
 
         // Get gateway settings
-        $gateway = WC()->payment_gateways()->payment_gateways()['mpesa_till'];
+        $gateway = WC()->payment_gateways()->payment_gateways()['mpesa_till'] ?? null;
 
         if (!$gateway) {
             wp_send_json_error(array('message' => __('Payment gateway not available.', 'marupurupu-checkout-for-mpesa')));

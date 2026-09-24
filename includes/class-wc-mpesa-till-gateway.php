@@ -267,8 +267,11 @@ class Marupurupu_Gateway extends WC_Payment_Gateway {
         if (!self::is_valid_phone_number($phone)) {
             wc_add_notice(__('Please enter a valid M-Pesa phone number (format: 254XXXXXXXXX).', 'marupurupu-checkout-for-mpesa'), 'error');
 
+            // 'failure' is the value WooCommerce (classic and Blocks) recognises;
+            // Blocks ignores anything else and shows a generic error instead of
+            // the notice added above.
             return array(
-                'result' => 'fail',
+                'result' => 'failure',
                 'redirect' => ''
             );
         }
@@ -343,7 +346,7 @@ class Marupurupu_Gateway extends WC_Payment_Gateway {
             $order->add_order_note(sprintf(__('M-Pesa payment failed: %s', 'marupurupu-checkout-for-mpesa'), $error_message));
 
             return array(
-                'result' => 'fail',
+                'result' => 'failure',
                 'redirect' => ''
             );
         }

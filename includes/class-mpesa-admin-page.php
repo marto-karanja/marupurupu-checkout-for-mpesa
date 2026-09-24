@@ -108,23 +108,23 @@ class Marupurupu_Admin_Page {
             <!-- Statistics Cards -->
             <div class="mpesa-stats">
                 <div class="mpesa-stat-card">
-                    <h3><?php echo number_format($stats->total); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n((int) $stats->total)); ?></h3>
                     <p><?php esc_html_e('Total Transactions', 'marupurupu-checkout-for-mpesa'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-success">
-                    <h3><?php echo number_format($stats->completed); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n((int) $stats->completed)); ?></h3>
                     <p><?php esc_html_e('Completed', 'marupurupu-checkout-for-mpesa'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-pending">
-                    <h3><?php echo number_format($stats->pending); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n((int) $stats->pending)); ?></h3>
                     <p><?php esc_html_e('Pending', 'marupurupu-checkout-for-mpesa'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-failed">
-                    <h3><?php echo number_format($stats->failed); ?></h3>
+                    <h3><?php echo esc_html(number_format_i18n((int) $stats->failed)); ?></h3>
                     <p><?php esc_html_e('Failed', 'marupurupu-checkout-for-mpesa'); ?></p>
                 </div>
                 <div class="mpesa-stat-card mpesa-stat-amount">
-                    <h3><?php echo wp_kses_post(wc_price($stats->total_amount)); ?></h3>
+                    <h3><?php echo wp_kses_post(wc_price((float) $stats->total_amount)); ?></h3>
                     <p><?php esc_html_e('Total Revenue', 'marupurupu-checkout-for-mpesa'); ?></p>
                 </div>
             </div>
@@ -140,11 +140,11 @@ class Marupurupu_Admin_Page {
                             <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'marupurupu-checkout-for-mpesa'); ?></option>
                             <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'marupurupu-checkout-for-mpesa'); ?></option>
                         </select>
-                        <input type="submit" class="button" value="<?php esc_html_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
+                        <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
                     </div>
                     <div class="alignleft actions">
-                        <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_html_e('Search by order ID, receipt, or phone...', 'marupurupu-checkout-for-mpesa'); ?>">
-                        <input type="submit" class="button" value="<?php esc_html_e('Search', 'marupurupu-checkout-for-mpesa'); ?>">
+                        <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search by order ID, receipt, or phone...', 'marupurupu-checkout-for-mpesa'); ?>">
+                        <input type="submit" class="button" value="<?php esc_attr_e('Search', 'marupurupu-checkout-for-mpesa'); ?>">
                         <?php if ($search || $status_filter): ?>
                             <a href="?page=marupurupu-transactions" class="button"><?php esc_html_e('Clear', 'marupurupu-checkout-for-mpesa'); ?></a>
                         <?php endif; ?>
@@ -209,9 +209,11 @@ class Marupurupu_Admin_Page {
                                         <?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($transaction->created_at))); ?>
                                     </td>
                                     <td>
-                                        <a href="<?php echo esc_url(get_edit_post_link($transaction->order_id)); ?>" class="button button-small">
-                                            <?php esc_html_e('View Order', 'marupurupu-checkout-for-mpesa'); ?>
-                                        </a>
+                                        <?php if ($order): ?>
+                                            <a href="<?php echo esc_url(get_edit_post_link($transaction->order_id)); ?>" class="button button-small">
+                                                <?php esc_html_e('View Order', 'marupurupu-checkout-for-mpesa'); ?>
+                                            </a>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -238,7 +240,7 @@ class Marupurupu_Admin_Page {
                             <option value=""><?php esc_html_e('Bulk Actions', 'marupurupu-checkout-for-mpesa'); ?></option>
                             <option value="export_csv"><?php esc_html_e('Export to CSV', 'marupurupu-checkout-for-mpesa'); ?></option>
                         </select>
-                        <input type="submit" class="button" value="<?php esc_html_e('Apply', 'marupurupu-checkout-for-mpesa'); ?>">
+                        <input type="submit" class="button" value="<?php esc_attr_e('Apply', 'marupurupu-checkout-for-mpesa'); ?>">
                     </div>
 
                     <!-- Pagination -->
@@ -347,14 +349,14 @@ class Marupurupu_Admin_Page {
         foreach ($transactions as $transaction) {
             fputcsv($output, array(
                 $transaction->order_id,
-                $transaction->transaction_id,
-                $transaction->merchant_request_id,
-                $transaction->checkout_request_id,
-                $transaction->phone_number,
+                Marupurupu_Helpers::csv_safe($transaction->transaction_id),
+                Marupurupu_Helpers::csv_safe($transaction->merchant_request_id),
+                Marupurupu_Helpers::csv_safe($transaction->checkout_request_id),
+                Marupurupu_Helpers::csv_safe($transaction->phone_number),
                 $transaction->amount,
-                $transaction->result_code,
-                $transaction->result_desc,
-                $transaction->status,
+                Marupurupu_Helpers::csv_safe($transaction->result_code),
+                Marupurupu_Helpers::csv_safe($transaction->result_desc),
+                Marupurupu_Helpers::csv_safe($transaction->status),
                 $transaction->created_at,
                 $transaction->updated_at
             ));

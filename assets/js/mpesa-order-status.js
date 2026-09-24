@@ -18,7 +18,6 @@
             if (sessionStorage && $('#mpesa-status-success').is(':visible')) {
                 sessionStorage.removeItem('marupurupu_payment_confirmed');
                 sessionStorage.removeItem('marupurupu_reload_done');
-                console.log('M-Pesa: Cleared reload flags after successful reload');
             }
 
             this.bindEvents();
@@ -26,13 +25,11 @@
 
             // Don't start checking if payment is already successful
             if ($('#mpesa-status-success').is(':visible')) {
-                console.log('M-Pesa: Payment already confirmed, skipping status checks');
                 return;
             }
 
             // Don't start checking if already failed and showing retry options
             if ($('#mpesa-status-failed').is(':visible')) {
-                console.log('M-Pesa: Payment already failed, status checks not needed');
                 return;
             }
 
@@ -40,6 +37,14 @@
             if ($('#mpesa-status-pending').length > 0) {
                 this.startStatusCheck();
             }
+        },
+
+        /**
+         * Translated string passed from PHP (marupurupu_order_params.i18n).
+         */
+        t: function(key) {
+            var strings = marupurupu_order_params.i18n || {};
+            return strings[key] || '';
         },
 
         /**
@@ -86,8 +91,6 @@
         startStatusCheck: function() {
             var self = this;
 
-            console.log('M-Pesa: Starting payment status checks (max ' + this.maxChecks + ' checks)');
-
             // Initial check
             this.checkStatus();
 
@@ -101,7 +104,6 @@
                     return;
                 }
 
-                console.log('M-Pesa: Status check #' + self.checkCount + '/' + self.maxChecks);
                 self.checkStatus();
             }, 5000);
         },
@@ -110,7 +112,6 @@
             if (this.checkInterval) {
                 clearInterval(this.checkInterval);
                 this.checkInterval = null;
-                console.log('M-Pesa: Status checking stopped');
             }
         },
 
@@ -145,11 +146,8 @@
                             return; // Exit immediately
                         }
                     }
-                },
-                error: function() {
-                    // Silent fail - will retry on next interval
-                    console.log('Status check failed - will retry');
                 }
+                // A failed poll is silent: the next interval simply tries again.
             });
         },
 
@@ -167,12 +165,13 @@
         },
 
         showPaymentSuccess: function(data) {
+            var self = this;
+
             // Stop all checking immediately
             this.stopStatusCheck();
 
             // Check if we're already showing success (to prevent reload loop)
             if ($('#mpesa-status-success').is(':visible')) {
-                console.log('M-Pesa: Already showing success, skipping reload');
                 return;
             }
 
@@ -185,12 +184,7 @@
             $('#mpesa-status-success').fadeIn();
 
             // Show success message with next steps
-            var successMsg = data.message + ' ' +
-                'Your order is being processed. You will receive a confirmation email shortly.';
-            this.showMessage(successMsg, 'success');
-
-            // Log to console for debugging
-            console.log('Payment confirmed successfully:', data);
+            this.showMessage(data.message + ' ' + this.t('success_next'), 'success');
 
             // Set a flag to prevent multiple reloads
             if (sessionStorage) {
@@ -200,13 +194,13 @@
             // Reload page ONCE after 3 seconds to show updated order details
             var countdown = 3;
             var $reloadMsg = $('<p style="text-align: center; margin-top: 15px; color: #666;"></p>');
-            $reloadMsg.text('Refreshing page in ' + countdown + ' seconds...');
+            $reloadMsg.text(self.t('refreshing').replace('%d', countdown));
             $('.mpesa-order-status').append($reloadMsg);
 
             var countdownInterval = setInterval(function() {
                 countdown--;
                 if (countdown > 0) {
-                    $reloadMsg.text('Refreshing page in ' + countdown + ' seconds...');
+                    $reloadMsg.text(self.t('refreshing').replace('%d', countdown));
                 } else {
                     clearInterval(countdownInterval);
 
@@ -236,15 +230,14 @@
             $('#mpesa-verify-section').fadeIn();
 
             // Show error message with next steps
-            var failureMsg = data.message + '<br><br>' +
-                '<strong>What to do next:</strong><br>' +
-                '1. If you didn\'t complete the payment, click "Send Payment Request" below to retry<br>' +
-                '2. If you already paid, enter your M-Pesa transaction code to verify<br>' +
-                '3. Contact support if you need assistance';
-            this.showMessage(failureMsg, 'error');
-
-            // Log to console for debugging
-            console.log('Payment failed:', data);
+            this.showMessage([
+                data.message,
+                '',
+                { strong: this.t('what_next') },
+                '1. ' + this.t('failed_step_1'),
+                '2. ' + this.t('failed_step_2'),
+                '3. ' + this.t('failed_step_3')
+            ], 'error');
 
             // Scroll to retry section
             $('html, body').animate({
@@ -264,21 +257,20 @@
             $('#mpesa-verify-section').fadeIn();
 
             // Show timeout message with clear next steps
-            var timeoutMsg = '<strong>Payment confirmation timeout</strong><br><br>' +
-                'We haven\'t received confirmation yet. This could mean:<br>' +
-                '• The payment is still processing (please wait a few more minutes)<br>' +
-                '• You didn\'t complete the payment on your phone<br>' +
-                '• There was a network delay<br><br>' +
-                '<strong>What to do next:</strong><br>' +
-                '1. Check your phone for M-Pesa confirmation SMS<br>' +
-                '2. If you received an SMS, enter the transaction code below to verify<br>' +
-                '3. If you didn\'t pay yet, click "Send Payment Request" to retry<br>' +
-                '4. Refresh this page in a few minutes to check status';
-
-            this.showMessage(timeoutMsg, 'warning');
-
-            // Log timeout
-            console.log('Status check timeout after ' + this.checkCount + ' attempts');
+            this.showMessage([
+                { strong: this.t('timeout_title') },
+                '',
+                this.t('timeout_intro'),
+                '• ' + this.t('timeout_cause_1'),
+                '• ' + this.t('timeout_cause_2'),
+                '• ' + this.t('timeout_cause_3'),
+                '',
+                { strong: this.t('what_next') },
+                '1. ' + this.t('timeout_step_1'),
+                '2. ' + this.t('timeout_step_2'),
+                '3. ' + this.t('timeout_step_3'),
+                '4. ' + this.t('timeout_step_4')
+            ], 'warning');
 
             // Scroll to action section
             $('html, body').animate({
@@ -287,17 +279,19 @@
         },
 
         handleRetryPayment: function(e) {
+            var self = this;
+
             e.preventDefault();
 
             var $button = $(e.currentTarget);
             var phone = $('#mpesa-retry-phone').val();
 
             if (!phone || !phone.match(/^254[0-9]{9}$/)) {
-                this.showMessage('Please enter a valid phone number (format: 254XXXXXXXXX)', 'error');
+                this.showMessage(this.t('invalid_phone'), 'error');
                 return;
             }
 
-            $button.prop('disabled', true).text('Sending...');
+            $button.prop('disabled', true).text(this.t('sending'));
 
             $.ajax({
                 url: marupurupu_order_params.ajax_url,
@@ -312,7 +306,7 @@
                 success: function(response) {
                     if (response.success) {
                         // Show success message
-                        this.showMessage(response.data.message + ' Check your phone now.', 'success');
+                        self.showMessage(response.data.message + ' ' + self.t('check_phone'), 'success');
 
                         // Hide retry/verify sections
                         $('#mpesa-retry-section').slideUp();
@@ -323,35 +317,36 @@
                         $('#mpesa-status-pending').fadeIn();
 
                         // Reset and restart status checking
-                        this.stopStatusCheck(); // Stop any existing checks first
-                        this.checkCount = 0;
-                        console.log('M-Pesa: Payment retry initiated, restarting status checks');
-                        this.startStatusCheck();
+                        self.stopStatusCheck(); // Stop any existing checks first
+                        self.checkCount = 0;
+                        self.startStatusCheck();
                     } else {
-                        this.showMessage(response.data.message, 'error');
+                        self.showMessage(response.data.message, 'error');
                     }
-                }.bind(this),
+                },
                 error: function() {
-                    this.showMessage('Connection error. Please try again.', 'error');
-                }.bind(this),
+                    self.showMessage(self.t('connection_error'), 'error');
+                },
                 complete: function() {
-                    $button.prop('disabled', false).text('Send Payment Request');
+                    $button.prop('disabled', false).text(self.t('send_request'));
                 }
             });
         },
 
         handleVerifyCode: function(e) {
+            var self = this;
+
             e.preventDefault();
 
             var $button = $(e.currentTarget);
             var code = $('#mpesa-transaction-code').val().trim().toUpperCase();
 
             if (!code) {
-                this.showMessage('Please enter the M-Pesa transaction code', 'error');
+                this.showMessage(this.t('enter_code'), 'error');
                 return;
             }
 
-            $button.prop('disabled', true).text('Verifying...');
+            $button.prop('disabled', true).text(this.t('verifying'));
 
             $.ajax({
                 url: marupurupu_order_params.ajax_url,
@@ -365,26 +360,31 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        this.showMessage(response.data.message, 'success');
+                        self.showMessage(response.data.message, 'success');
                         $('#mpesa-verify-section').slideUp();
 
                         setTimeout(function() {
                             location.reload();
                         }, 2000);
                     } else {
-                        this.showMessage(response.data.message, 'error');
+                        self.showMessage(response.data.message, 'error');
                     }
-                }.bind(this),
+                },
                 error: function() {
-                    this.showMessage('Connection error. Please try again.', 'error');
-                }.bind(this),
+                    self.showMessage(self.t('connection_error'), 'error');
+                },
                 complete: function() {
-                    $button.prop('disabled', false).text('Verify Payment');
+                    $button.prop('disabled', false).text(self.t('verify_payment'));
                 }
             });
         },
 
-        showMessage: function(message, type) {
+        /**
+         * Show a message. `parts` is a string, or an array of lines where each
+         * line is a string or {strong: 'text'}. Everything is inserted as text
+         * (never parsed as HTML), so server-supplied messages cannot inject markup.
+         */
+        showMessage: function(parts, type) {
             var $container = $('#mpesa-messages');
 
             var alertClass = 'woocommerce-info';
@@ -394,9 +394,22 @@
                 alertClass = 'woocommerce-message';
             }
 
-            var $message = $('<div class="' + alertClass + '">' + message + '</div>');
+            var $message = $('<div></div>').addClass(alertClass);
+            var lines = Array.isArray(parts) ? parts : [parts];
 
-            $container.html($message);
+            $.each(lines, function(index, line) {
+                if (index > 0) {
+                    $message.append(document.createElement('br'));
+                }
+
+                if (line && typeof line === 'object' && line.strong) {
+                    $message.append($('<strong></strong>').text(line.strong));
+                } else {
+                    $message.append(document.createTextNode(line));
+                }
+            });
+
+            $container.empty().append($message);
 
             $('html, body').animate({
                 scrollTop: $container.offset().top - 100

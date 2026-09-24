@@ -159,7 +159,7 @@ class Marupurupu_Reports {
                     <label for="date_to"><?php esc_html_e('To:', 'marupurupu-checkout-for-mpesa'); ?></label>
                     <input type="date" name="date_to" id="date_to" value="<?php echo esc_attr($date_to); ?>">
 
-                    <input type="submit" class="button button-primary" value="<?php esc_html_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
+                    <input type="submit" class="button button-primary" value="<?php esc_attr_e('Filter', 'marupurupu-checkout-for-mpesa'); ?>">
 
                     <a href="?page=marupurupu-payments" class="button"><?php esc_html_e('Reset', 'marupurupu-checkout-for-mpesa'); ?></a>
 
@@ -176,7 +176,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-money-alt"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo wp_kses_post(wc_price($stats->total_revenue)); ?></h3>
+                        <h3><?php echo wp_kses_post(wc_price((float) $stats->total_revenue)); ?></h3>
                         <p><?php esc_html_e('Total Revenue', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -186,7 +186,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-yes-alt"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo number_format($stats->completed); ?></h3>
+                        <h3><?php echo esc_html(number_format_i18n((int) $stats->completed)); ?></h3>
                         <p><?php esc_html_e('Successful Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -196,7 +196,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-clock"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo number_format($stats->pending); ?></h3>
+                        <h3><?php echo esc_html(number_format_i18n((int) $stats->pending)); ?></h3>
                         <p><?php esc_html_e('Pending Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -206,7 +206,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-dismiss"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo number_format($stats->failed); ?></h3>
+                        <h3><?php echo esc_html(number_format_i18n((int) $stats->failed)); ?></h3>
                         <p><?php esc_html_e('Failed Payments', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -216,7 +216,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-chart-bar"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo number_format($stats->total, 0); ?></h3>
+                        <h3><?php echo esc_html(number_format_i18n((int) $stats->total)); ?></h3>
                         <p><?php esc_html_e('Total Transactions', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ class Marupurupu_Reports {
                         <span class="dashicons dashicons-chart-line"></span>
                     </div>
                     <div class="card-content">
-                        <h3><?php echo wp_kses_post(wc_price($stats->avg_transaction)); ?></h3>
+                        <h3><?php echo wp_kses_post(wc_price((float) $stats->avg_transaction)); ?></h3>
                         <p><?php esc_html_e('Average Transaction', 'marupurupu-checkout-for-mpesa'); ?></p>
                     </div>
                 </div>
@@ -264,12 +264,12 @@ class Marupurupu_Reports {
                                 <tr>
                                     <td><?php echo absint($rank++); ?></td>
                                     <td><?php echo esc_html($customer->phone_number); ?></td>
-                                    <td><?php echo number_format($customer->total_transactions); ?></td>
+                                    <td><?php echo esc_html(number_format_i18n((int) $customer->total_transactions)); ?></td>
                                     <td><?php echo wp_kses_post(wc_price($customer->total_amount)); ?></td>
                                     <td>
                                         <?php
                                         $success_rate = ($customer->completed / $customer->total_transactions) * 100;
-                                        echo number_format($success_rate, 1) . '%';
+                                        echo esc_html(number_format_i18n($success_rate, 1)) . '%';
                                         ?>
                                     </td>
                                 </tr>
@@ -436,11 +436,11 @@ add_action('admin_post_marupurupu_export_report', function() {
         fputcsv($output, array(
             $transaction->created_at,
             $transaction->order_id,
-            $transaction->transaction_id,
-            $transaction->phone_number,
+            Marupurupu_Helpers::csv_safe($transaction->transaction_id),
+            Marupurupu_Helpers::csv_safe($transaction->phone_number),
             $transaction->amount,
-            $transaction->status,
-            $transaction->result_desc
+            Marupurupu_Helpers::csv_safe($transaction->status),
+            Marupurupu_Helpers::csv_safe($transaction->result_desc)
         ));
     }
 

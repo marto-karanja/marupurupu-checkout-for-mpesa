@@ -28,6 +28,41 @@ class Marupurupu_API {
     }
 
     /**
+     * Labels of the settings an STK Push needs that are empty (or not a
+     * string, e.g. a failed decryption), in the order they appear on the
+     * settings screen. Empty when everything is provided.
+     *
+     * @return string[]
+     */
+    private function missing_settings() {
+        $required = array(
+            __('Consumer Key', 'marupurupu-checkout-for-mpesa')    => $this->consumer_key,
+            __('Consumer Secret', 'marupurupu-checkout-for-mpesa') => $this->consumer_secret,
+            __('Business Shortcode', 'marupurupu-checkout-for-mpesa') => $this->shortcode,
+            __('Till Number', 'marupurupu-checkout-for-mpesa')     => $this->till_number,
+            __('Passkey', 'marupurupu-checkout-for-mpesa')         => $this->passkey,
+        );
+
+        $missing = array();
+        foreach ($required as $label => $value) {
+            if (!is_string($value) || trim($value) === '') {
+                $missing[] = $label;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Whether every value an STK Push needs has been provided.
+     *
+     * @return bool
+     */
+    private function is_configured() {
+        return array() === $this->missing_settings();
+    }
+
+    /**
      * Generate access token
      */
     private function get_access_token() {
@@ -132,6 +167,18 @@ class Marupurupu_API {
         if ($result['status'] == 200) {
             $decoded = json_decode($result['raw'], true);
             if (isset($decoded['access_token'])) {
+                // The token only proves the Consumer Key/Secret. Payments also
+                // need the shortcode, till number and passkey, and without them
+                // shoppers cannot pay -- so don't report a clean bill of health.
+                $missing = $this->missing_settings();
+                if (!empty($missing)) {
+                    return array(
+                        'success' => false,
+                        /* translators: %s: comma-separated list of empty settings */
+                        'message' => sprintf(__('Safaricom accepted the Consumer Key/Secret, but payments will fail until these settings are filled in: %s.', 'marupurupu-checkout-for-mpesa'), implode(', ', $missing)),
+                    );
+                }
+
                 return array(
                     'success' => true,
                     'message' => __('Connected successfully -- Safaricom accepted these credentials and issued an access token.', 'marupurupu-checkout-for-mpesa'),
@@ -172,6 +219,19 @@ class Marupurupu_API {
      * Initiate STK Push
      */
     public function stk_push($phone, $amount, $order_id, $callback_url) {
+        // Unconfigured gateway: don't send empty credentials to Safaricom, and
+        // don't show shoppers a raw API error. Merchants see the reason in the
+        // log and on the settings screen's connection test.
+        $missing = $this->missing_settings();
+        if (!empty($missing)) {
+            error_log('M-Pesa API Error (stk_push): these gateway settings are empty for the current mode: ' . implode(', ', $missing));
+
+            return array(
+                'ResponseCode' => '1',
+                'errorMessage' => __('M-Pesa payments are temporarily unavailable. Please choose another payment method or contact the store.', 'marupurupu-checkout-for-mpesa')
+            );
+        }
+
         $access_token = $this->get_access_token();
 
         if (!$access_token) {

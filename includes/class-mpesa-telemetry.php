@@ -348,26 +348,6 @@ class Marupurupu_Telemetry {
     }
 
     /**
-     * Track plugin activation
-     */
-    public static function track_activation() {
-        $data = array(
-            'event' => 'activation',
-            'wordpress_version' => get_bloginfo('version'),
-            'woocommerce_version' => WC()->version,
-            'php_version' => PHP_VERSION,
-            'site_language' => get_locale(),
-            'multisite' => is_multisite()
-        );
-
-        // Routed through send(), which re-checks is_enabled() — activation
-        // fires before the merchant has necessarily seen/saved the opt-in
-        // checkbox, so this must never bypass that gate (WordPress.org
-        // Guideline 7 requires explicit consent before any external request).
-        self::send($data);
-    }
-
-    /**
      * Track plugin deactivation
      */
     public static function track_deactivation() {
@@ -418,9 +398,12 @@ class Marupurupu_Telemetry {
     }
 }
 
-// Initialize telemetry
-add_action('plugins_loaded', array('Marupurupu_Telemetry', 'init'), 20);
+// Initialize telemetry. Hooked to init (not plugins_loaded): is_enabled() ->
+// get_gateway() calls WC()->payment_gateways(), which lazily constructs every
+// registered gateway (including ours) on first call. Doing that before init has
+// fired triggers WordPress's "translation loading triggered too early" notice
+// for the __() calls in Marupurupu_Gateway::__construct().
+add_action('init', array('Marupurupu_Telemetry', 'init'), 20);
 
-// Track activation/deactivation
-register_activation_hook(MARUPURUPU_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Marupurupu_Telemetry', 'track_activation'));
+// Track deactivation (sends only if the merchant has opted in; send() re-checks).
 register_deactivation_hook(MARUPURUPU_PLUGIN_DIR . 'marupurupu-checkout-for-mpesa.php', array('Marupurupu_Telemetry', 'track_deactivation'));

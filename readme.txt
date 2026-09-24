@@ -4,7 +4,8 @@ Tags: woocommerce, mpesa, payment gateway, kenya, safaricom
 Requires at least: 5.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Requires Plugins: woocommerce
+Stable tag: 1.6.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -154,6 +155,21 @@ The plugin automatically generates a callback URL, including a secret token uniq
 6. Payment settings and encryption management
 
 == Changelog ==
+
+= 1.6.3 - 2026-09-24 =
+* Fixed: The M-Pesa Transactions and Reports pages logged PHP 8.1 "Passing null to number_format()" deprecations on a store with no transactions yet.
+* Fixed: If the plugin was activated while WooCommerce was inactive, its transactions table was never created. The activation hook is now registered before the WooCommerce check, and a missing table is created on the next load once WooCommerce is active. The "requires WooCommerce" notice is now translatable, and network-activated WooCommerce is recognised. The plugin header now declares `Requires Plugins: woocommerce`.
+* Fixed: A failed payment attempt on the block-based checkout now shows the gateway's own message instead of a generic error (the gateway returned `fail`, which WooCommerce Blocks does not recognise; it now returns `failure`).
+* Changed: If the gateway is enabled but its credentials, shortcode, till number or passkey are not filled in, a payment attempt now stops with a friendly message instead of contacting Safaricom with empty credentials and showing "Failed to get access token".
+* Changed: "Test M-Pesa Connection" now also lists any of Business Shortcode, Till Number or Passkey that is still empty, instead of reporting success when only the Consumer Key/Secret were checked.
+* Fixed: The Transactions list no longer shows a "View Order" button (and no longer logs a PHP deprecation) for transactions whose order has been deleted. Button/placeholder text inside HTML attributes is now escaped as attribute text, and the plugin-list "Settings" link is translatable.
+* Changed: The order-received page's payment-status script is fully translatable, no longer writes debug output to the browser console, and inserts messages as plain text rather than HTML.
+* Security: CSV exports (transactions and reports) now prefix any text cell starting with `=`, `+`, `-` or `@` so spreadsheet programs cannot run it as a formula.
+* Changed: The usage-statistics opt-in no longer describes (or attempts) an "activation" event, which never fired. Only the opt-in "deactivation" event remains, and the readme now says exactly what it contains.
+* Changed: `WC tested up to` raised to 11.1; the amount shown on the order-received page is escaped.
+
+= 1.6.2 - 2026-09-22 =
+* Fixed: On admin pages, activating the plugin with opt-in telemetry enabled could trigger a WordPress "translation loading triggered too early" notice. The telemetry check was reading the gateway's settings before WordPress had finished its own startup sequence, which also forced the gateway itself to load earlier than it should have; both now wait until WordPress is ready. No setting, saved credential, or behavior changes as a result.
 
 = 1.6.1 - 2026-09-19 =
 * Changed: The plugin's display name is now "Marupurupu Checkout for M-Pesa" (the "and WooCommerce" suffix was removed), following WordPress.org Plugin Review Team feedback that "WooCommerce" is a restricted term in plugin names. The slug, text domain, settings, saved credentials, orders and the Safaricom callback URL are all unchanged. No functional change.
@@ -320,8 +336,8 @@ This plugin:
 Anonymous usage telemetry is **off by default**. It only activates if you
 check "Help improve this plugin by sharing anonymous usage data" under
 WooCommerce > Settings > Payments > M-Pesa Till > Anonymous Usage Data, and
-stops sending anything as soon as you uncheck it or deactivate the plugin (any leftover scheduled
-tasks then do nothing).
+stops sending anything as soon as you uncheck it (any leftover scheduled
+tasks then do nothing). If you had opted in, deactivating the plugin sends one final `deactivation` event (described below).
 
 **Site identifier**: every event includes a `site_id` — a SHA-256 hash of
 your site's URL. This is a stable, unique-per-install pseudonymous
@@ -330,7 +346,7 @@ can be correlated with each other over time (e.g. to see version-upgrade
 history), even though your actual site URL, domain, or any other
 identifying detail is never transmitted.
 
-**What's sent, by event type:**
+**What's sent, by event type** (the `feature_usage`, `error` and `performance` events are supported by the code but the plugin does not currently trigger them; they are listed so the disclosure stays complete if that changes):
 
 * `heartbeat` (weekly) — WordPress, WooCommerce, PHP, and MySQL version
   numbers; server software string; PHP memory limit and max execution
@@ -352,8 +368,9 @@ identifying detail is never transmitted.
 * `performance` (weekly aggregate) — timing metrics (count/min/max/average
   duration in milliseconds) for named internal operations, with no
   reference to which orders they came from.
-* `activation` / `deactivation` — sent once each, same version/environment
-  fields as `heartbeat` plus the event name itself.
+* `deactivation` — sent once when the plugin is deactivated (and only if you
+  had opted in): just the event name, the anonymous site identifier, the
+  plugin version and a timestamp. No event is sent on activation.
 
 **Never included, in any event, ever**: phone numbers, order details,
 customer names or addresses, or M-Pesa credentials (Consumer Key/Secret,
